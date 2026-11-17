@@ -110,13 +110,21 @@ const state = {
   })(),
   orders: (() => {
     try {
+      const isZeroed = localStorage.getItem('tasweeq_kpi_zeroed_v1');
+      if (!isZeroed) {
+        localStorage.removeItem('tasweeq_orders');
+        localStorage.removeItem('tasweeq_expenses');
+        localStorage.removeItem('tasweeq_complaints');
+        localStorage.setItem('tasweeq_kpi_zeroed_v1', 'true');
+        return [];
+      }
       const s = localStorage.getItem('tasweeq_orders');
       if (s) {
         const parsed = JSON.parse(s);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) { }
-    return [...window.GROCERY_DATA.orders];
+    return [...((window.GROCERY_DATA && window.GROCERY_DATA.orders) || [])];
   })(),
   complaints: (() => {
     try {
@@ -174,10 +182,14 @@ const state = {
   faqs: [...window.GROCERY_DATA.faqs],
   expenses: (() => {
     try {
+      const isZeroed = localStorage.getItem('tasweeq_kpi_zeroed_v1');
+      if (!isZeroed) {
+        return [];
+      }
       const stored = JSON.parse(localStorage.getItem('tasweeq_expenses'));
-      if (Array.isArray(stored) && stored.length >= (window.GROCERY_DATA.expenses || []).length) return stored;
+      if (Array.isArray(stored)) return stored;
     } catch (e) { }
-    return [...(window.GROCERY_DATA.expenses || [])];
+    return [...((window.GROCERY_DATA && window.GROCERY_DATA.expenses) || [])];
   })(),
   profitDateFilter: {
     type: 'all',
@@ -9805,3 +9817,31 @@ window.addEventListener('taswoq:system-generation-updated', function (event) {
   }
   if (typeof applySyncedData === 'function') applySyncedData(freshData);
 });
+
+// ==========================================================================
+// تهيئة وتصفير قسم المؤشرات والأرباح (البدء من الصفر للإنتاج)
+// ==========================================================================
+function resetKpiAndProfits(confirmFirst = true) {
+  if (confirmFirst && !confirm('هل أنت متأكد من تصفير وتهيئة قسم المؤشرات والأرباح والبدء من الصفر (0.00 ر.ي)؟')) {
+    return;
+  }
+  if (typeof state !== 'undefined') {
+    state.orders = [];
+    state.expenses = [];
+  }
+  try {
+    localStorage.setItem('tasweeq_orders', JSON.stringify([]));
+    localStorage.setItem('tasweeq_expenses', JSON.stringify([]));
+    localStorage.setItem('tasweeq_kpi_zeroed_v1', 'true');
+  } catch (e) { }
+  if (typeof renderAdminAll === 'function') {
+    try { renderAdminAll(); } catch (e) { console.warn(e); }
+  } else {
+    if (typeof renderAdminKpis === 'function') { try { renderAdminKpis(); } catch(e){} }
+    if (typeof renderAdminChart === 'function') { try { renderAdminChart(); } catch(e){} }
+    if (typeof renderAdminExpenses === 'function') { try { renderAdminExpenses(); } catch(e){} }
+  }
+  if (typeof updateAdminBadges === 'function') { try { updateAdminBadges(); } catch(e){} }
+  if (typeof showToast === 'function') showToast('✅ تم تصفير وتهيئة قسم المؤشرات والأرباح بنجاح (0.00 ر.ي)');
+}
+window.resetKpiAndProfits = resetKpiAndProfits;

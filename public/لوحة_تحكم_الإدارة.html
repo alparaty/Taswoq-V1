@@ -1463,6 +1463,11 @@
                 style="font-weight: 800; font-size: 0.8rem; padding: 7px 14px; border-radius: 9px; display: inline-flex; align-items: center; gap: 6px;">
                 <span>📑</span> <span>تصدير تقرير الفترة CSV</span>
               </button>
+              <button type="button" class="ctrl-btn reset-kpi-btn" onclick="resetKpiAndProfits()"
+                title="تصفير وتهيئة قسم المؤشرات والأرباح والبدء من الصفر (0.00 ر.ي)"
+                style="font-weight: 800; font-size: 0.8rem; padding: 7px 14px; border-radius: 9px; display: inline-flex; align-items: center; gap: 6px; color: #ef4444; border-color: rgba(239, 68, 68, 0.35);">
+                <span>🔄</span> <span>تصفير وتهيئة المؤشرات (0.00 ر.ي)</span>
+              </button>
             </div>
           </div>
 
@@ -1546,7 +1551,7 @@
               <span class="kpi-title">إجمالي طلبات الفترة</span>
               <span class="kpi-icon-badge">🛍️</span>
             </div>
-            <div class="kpi-value" id="kpi-orders-count">2</div>
+            <div class="kpi-value" id="kpi-orders-count">0</div>
             <div class="kpi-sub"><span class="kpi-trend-up">↑ نشط</span> <span>طلبات واردة</span></div>
           </div>
 
@@ -1555,7 +1560,7 @@
               <span class="kpi-title">مبيعات المنتجات</span>
               <span class="kpi-icon-badge">💰</span>
             </div>
-            <div class="kpi-value" id="kpi-sales-amount">121.20 ر.ي</div>
+            <div class="kpi-value" id="kpi-sales-amount">0.00 ر.ي</div>
             <div class="kpi-sub"><span>مجموع قيم الأصناف فقط</span></div>
           </div>
 
@@ -1564,7 +1569,7 @@
               <span class="kpi-title">رسوم التوصيل المحصلة</span>
               <span class="kpi-icon-badge">🚚</span>
             </div>
-            <div class="kpi-value" id="kpi-delivery-collected" style="color: var(--info);">5.00 ر.ي</div>
+            <div class="kpi-value" id="kpi-delivery-collected" style="color: var(--info);">0.00 ر.ي</div>
             <div class="kpi-sub"><span>مستثناة من صافي الربح ومخصصة إلى </span></div>
           </div>
 
@@ -1573,7 +1578,7 @@
               <span class="kpi-title">إجمالي تكلفة الشراء</span>
               <span class="kpi-icon-badge">🏷️</span>
             </div>
-            <div class="kpi-value" id="kpi-cost-amount">79.50 ر.ي</div>
+            <div class="kpi-value" id="kpi-cost-amount">0.00 ر.ي</div>
             <div class="kpi-sub"><span>تكلفة المنتجات الفعلية</span></div>
           </div>
 
@@ -1582,7 +1587,7 @@
               <span class="kpi-title">المصروفات التشغيلية</span>
               <span class="kpi-icon-badge" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">💸</span>
             </div>
-            <div class="kpi-value" id="kpi-expense-amount" style="color: #ef4444;">185.00 ر.ي</div>
+            <div class="kpi-value" id="kpi-expense-amount" style="color: #ef4444;">0.00 ر.ي</div>
             <div class="kpi-sub"><span id="kpi-expense-sub">وقود، صيانة، كراتين، إيجار</span></div>
           </div>
 
@@ -1591,8 +1596,8 @@
               <span class="kpi-title">صافي الربح الفعلي</span>
               <span class="kpi-icon-badge">✨</span>
             </div>
-            <div class="kpi-value" id="kpi-profit-amount">41.70 ر.ي</div>
-            <div class="kpi-sub"><span class="kpi-trend-up" id="kpi-profit-margin">هامش الربح: 34.4%</span></div>
+            <div class="kpi-value" id="kpi-profit-amount">0.00 ر.ي</div>
+            <div class="kpi-sub"><span class="kpi-trend-up" id="kpi-profit-margin">هامش الربح: 0%</span></div>
           </div>
         </div>
 
@@ -1971,7 +1976,7 @@
               <span class="kpi-title">إجمالي المصروفات المسجلة</span>
               <span class="kpi-icon-badge">💸</span>
             </div>
-            <div class="kpi-value" id="kpi-exp-total" style="color: #ef4444;">185.00 ر.ي</div>
+            <div class="kpi-value" id="kpi-exp-total" style="color: #ef4444;">0.00 ر.ي</div>
             <div class="kpi-sub"><span>تخصم من صافي الأرباح</span></div>
           </div>
 
@@ -1980,7 +1985,7 @@
               <span class="kpi-title">بند وقود الدبابات</span>
               <span class="kpi-icon-badge">⛽</span>
             </div>
-            <div class="kpi-value" id="kpi-exp-fuel">45.00 ر.ي</div>
+            <div class="kpi-value" id="kpi-exp-fuel">0.00 ر.ي</div>
             <div class="kpi-sub"><span>بنزين دبابات التوصيل</span></div>
           </div>
 
@@ -1989,7 +1994,7 @@
               <span class="kpi-title">الصيانة والتغليف والمؤن</span>
               <span class="kpi-icon-badge">📦</span>
             </div>
-            <div class="kpi-value" id="kpi-exp-maint">140.00 ر.ي</div>
+            <div class="kpi-value" id="kpi-exp-maint">0.00 ر.ي</div>
             <div class="kpi-sub"><span>كراتين، إيجار، نثريات</span></div>
           </div>
         </div>
@@ -4431,6 +4436,12 @@
       if (target) {
         target.classList.add('active');
         // Render section data dynamically upon tab activation
+                if (tabKey === 'dashboard') {
+          try {
+            if (typeof renderAdminKpis === 'function') renderAdminKpis();
+            if (typeof renderAdminChart === 'function') renderAdminChart();
+          } catch(e) { console.warn(e); }
+        }
         if (tabKey === 'orders' && typeof renderAdminOrders === 'function') {
           try { renderAdminOrders(); } catch(e) { console.warn(e); }
         }
