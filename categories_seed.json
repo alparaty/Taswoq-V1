@@ -1,0 +1,72 @@
+{
+  "categories": [
+    {
+      "id": "all",
+      "nameAr": "كل الأقسام",
+      "nameEn": "All",
+      "icon": "⊞",
+      "isSpecial": true
+    },
+    {
+      "id": "healthy",
+      "nameAr": "أكل صحي",
+      "nameEn": "Healthy Food",
+      "icon": "🥑",
+      "img": "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=160&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "fresh",
+      "nameAr": "خضار وفواكه",
+      "nameEn": "Fresh Produce",
+      "icon": "🥦",
+      "img": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=160&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "meat",
+      "nameAr": "لحوم ودواجن",
+      "nameEn": "Meat & Poultry",
+      "icon": "🥩",
+      "img": "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=160&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "dairy",
+      "nameAr": "ألبان وأجبان",
+      "nameEn": "Dairy & Cheese",
+      "icon": "🧀",
+      "img": "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=160&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "bakery",
+      "nameAr": "مخبوزات وطازج",
+      "nameEn": "Bakery",
+      "icon": "🥐",
+      "img": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=160&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "snacks",
+      "nameAr": "حلويات وسناكس",
+      "nameEn": "Snacks",
+      "icon": "🍫",
+      "img": "https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=160&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "drinks",
+      "nameAr": "مشروبات وعصائر",
+      "nameEn": "Beverages",
+      "icon": "🧃",
+      "img": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=160&auto=format&fit=crop&q=80"
+    },
+    {
+      "id": "cat_mvpnfgdtqe2",
+      "nameAr": "منتجات",
+      "nameEn": "منتجات",
+      "icon": "📦"
+    },
+    {
+      "id": "cat_mw7y548f07u",
+      "nameAr": "بقالة",
+      "nameEn": "بقالة",
+      "icon": "🏷️"
+    }
+  ]
+}

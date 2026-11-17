@@ -1,0 +1,32 @@
+[Unit]
+Description=Taswoq Production Central Sync Server (Python & PostgreSQL)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=taswoq
+Group=taswoq
+WorkingDirectory=/var/www/taswoq
+EnvironmentFile=/var/www/taswoq/.env
+EnvironmentFile=-/etc/taswoq/secrets.env
+ExecStart=/var/www/taswoq/venv/bin/python /var/www/taswoq/server_pg.py
+
+# إعادة التشغيل التلقائي عند أي توقف غير متوقع
+Restart=always
+RestartSec=5
+
+# حدود الموارد والأمان
+LimitNOFILE=65535
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+
+# توجيه السجلات إلى journald
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=taswoq-server
+
+[Install]
+WantedBy=multi-user.target
+

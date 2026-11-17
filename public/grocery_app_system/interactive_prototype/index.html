@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسوق | Taswoq</title>
+  <meta name="description" content="تطبيق تسوق لطلب المقاضي والمنتجات الطازجة عبر الواتساب مع لوحة إدارة ذكية لحساب المبيعات وصافي الأرباح">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/png" href="assets/images/favicon.png">
+  <link rel="apple-touch-icon" href="assets/images/taswoq_logo_192.png">
+</head>
+<body>
+
+  <!-- Global Application Header -->
+  <header class="global-header">
+    <div class="brand-section">
+      <img src="assets/images/taswoq_logo.png" class="brand-logo-icon" alt="شعار تسوق" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; box-shadow: 0 4px 14px rgba(217, 119, 6, 0.28);">
+      <div class="brand-title-wrap">
+        <h1>تسوق <span class="brand-badge">Taswoq</span></h1>
+        <span class="brand-sub">نظام متكامل: تطبيق العميل + لوحة الإدارة والأرباح (SRS v3)</span>
+      </div>
+    </div>
+
+    <!-- Mode Switcher -->
+    <div class="view-mode-tabs" role="tablist">
+      <button class="mode-tab-btn active" data-mode="mobile" onclick="switchViewMode('mobile')">
+        <span>📱</span> <span>تطبيق الجوال</span>
+      </button>
+      <button class="mode-tab-btn" data-mode="admin" onclick="switchViewMode('admin')">
+        <span>💻</span> <span>لوحة تحكم الإدارة</span>
+      </button>
+      <a href="admin.html" target="_blank" class="mode-tab-btn" style="text-decoration: none; color: inherit; background: var(--primary-50); border: 1px solid rgba(16,185,129,0.3); font-weight: 800;" title="فتح لوحة الإدارة في نافذة مستقلة كاملة الشاشة">
+        <span>🚀</span> <span>لوحة الإدارة المستقلة (كاملة الشاشة)</span>
+      </a>
+    </div>
+
+    <!-- Controls -->
+    <div class="header-controls">
+      <button class="ctrl-btn" id="theme-toggle-btn" title="تبديل المظهر">
+        🌙 وضع ليلي
+      </button>
+      <button class="ctrl-btn" id="lang-toggle-btn" title="Change Language">
+        🌐 English
+      </button>
+      <button class="ctrl-btn" id="sound-toggle-btn" title="المؤثرات الصوتية">
+        🔊 الصوت مفعل
+      </button>
+    </div>
+  </header>
+
+  <!-- Main App Viewport -->
+  <main class="app-viewport">
+
+    <!-- 1. MOBILE PHONE SIMULATOR (Taswoq Client App) -->
+    <div class="phone-mockup-wrapper" id="mobile-phone-wrapper">
+      <div class="phone-device">
+        <div class="phone-screen">
+
+          <div class="dynamic-island">
+            <div class="island-camera"></div>
+            <div class="island-sensor"></div>
+          </div>
+
+          <div class="phone-status-bar">
+            <span>9:41</span>
+            <div class="status-right-icons">
+              <span>5G</span>
+              <span>📶</span>
+              <span>🔋 100%</span>
+            </div>
+          </div>
+
+          <!-- App Header -->
+          <div class="mobile-app-header">
+            <div class="header-top-row">
+              <button class="notif-bell-btn" id="header-notif-btn" onclick="openNotificationsModal()" title="مركز الإشعارات والتنبيهات" aria-label="الإشعارات">
+                <span class="bell-icon">🔔</span>
+                <span class="notif-badge" id="notif-badge" style="display: block;"></span>
+              </button>
+              <div class="app-header-brand" onclick="switchMobileTab('home')" title="تسوّق">
+                <div class="brand-text-col">
+                  <div class="brand-title-wrap">
+                    <span class="brand-title">تسوّق</span>
+                    <span class="brand-leaf">🍃</span>
+                  </div>
+                  <span class="brand-tagline">سوقك الطازج</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mobile-search-bar">
+              <input type="text" id="mobile-search-input" placeholder="ابحث في تسوق عن خضار، لحوم، لبن..." autocomplete="off" oninput="handleSearch(this.value)">
+              <button class="search-icon-btn" aria-label="بحث">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          
+
+          <div class="mobile-scroll-body">
+
+            <!-- TAB 1: HOME SCREEN -->
+            <section class="screen-view active" id="screen-home">
+              
+              <!-- Banner Carousel -->
+              <div class="banner-carousel">
+                <div class="banner-track" id="banner-track"></div>
+                <div class="banner-dots" id="banner-dots"></div>
+              </div>
+
+              <!-- Category Chips -->
+              <div class="categories-chips-scroll" id="categories-chips"></div>
+
+              
+
+
+              <!-- Section Header -->
+              <!-- Section Header (Reference Style) -->
+              <div class="section-header">
+                <div class="section-title-wrap">
+                  <span class="section-title-text">عروض تسوّق الطازجة</span>
+                  <span class="section-leaf-icon">🍃</span>
+                </div>
+                <button class="browse-daily-chip" onclick="selectCategory('all')">
+                  <span>تصفح يومي</span>
+                  <span class="arrow-icon">‹</span>
+                </button>
+              </div>
+
+              
+
+              <div class="products-grid" id="products-grid"></div>
+            </section>
+
+            <!-- TAB 2: CATEGORIES SCREEN -->
+            <section class="screen-view" id="screen-categories">
+              <div class="section-header" style="margin-bottom: 16px;">
+                <h3 class="section-title">🗂️ جميع أقسام تسوق</h3>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                <div class="category-chip" style="padding: 16px; border-radius: 16px; justify-content: center; flex-direction: column;" onclick="selectCategory('fresh'); switchMobileTab('home');">
+                  <span style="font-size: 2rem; margin-bottom: 6px;">🥑</span>
+                  <b>خضار وفواكه</b>
+                </div>
+                <div class="category-chip" style="padding: 16px; border-radius: 16px; justify-content: center; flex-direction: column;" onclick="selectCategory('meat'); switchMobileTab('home');">
+                  <span style="font-size: 2rem; margin-bottom: 6px;">🥩</span>
+                  <b>لحوم ودواجن</b>
+                </div>
+                <div class="category-chip" style="padding: 16px; border-radius: 16px; justify-content: center; flex-direction: column;" onclick="selectCategory('dairy'); switchMobileTab('home');">
+                  <span style="font-size: 2rem; margin-bottom: 6px;">🧀</span>
+                  <b>ألبان وأجبان</b>
+                </div>
+                <div class="category-chip" style="padding: 16px; border-radius: 16px; justify-content: center; flex-direction: column;" onclick="selectCategory('bakery'); switchMobileTab('home');">
+                  <span style="font-size: 2rem; margin-bottom: 6px;">🥐</span>
+                  <b>مخبوزات</b>
+                </div>
+                <div class="category-chip" style="padding: 16px; border-radius: 16px; justify-content: center; flex-direction: column;" onclick="selectCategory('pantry'); switchMobileTab('home');">
+                  <span style="font-size: 2rem; margin-bottom: 6px;">🥫</span>
+                  <b>مؤن ومعلبات</b>
+                </div>
+                <div class="category-chip" style="padding: 16px; border-radius: 16px; justify-content: center; flex-direction: column;" onclick="selectCategory('snacks'); switchMobileTab('home');">
+                  <span style="font-size: 2rem; margin-bottom: 6px;">🍫</span>
+                  <b>حلويات وسناكس</b>
+                </div>
+              </div>
+            </section>
+
+            <!-- TAB 3: CART & CHECKOUT SCREEN (SRS v3 Enhanced) -->
+            
+            <!-- TAB: FAVORITES SCREEN (قائمة المفضلة الخاصة) -->
+            <section class="screen-view" id="screen-favorites">
+              <div class="section-header">
+                <div class="section-title-wrap">
+                  <h3 class="section-title" style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <span>❤️</span> <span>قائمة منتجاتي المفضلة</span>
+                  </h3>
+                </div>
+                <span class="section-badge" id="fav-screen-badge">0 منتج</span>
+              </div>
+
+              <!-- Empty State -->
+              <div class="empty-state" id="empty-favorites-state" style="display: none;">
+                <div class="empty-icon">❤️</div>
+                <h3>قائمة المفضلة فارغة حالياً</h3>
+                <p>اضغط على علامة القلب ❤️ على أي منتج أثناء التصفح لحفظه في مفضلتك السريعة والرجوع إليه بسهولة</p>
+                <button class="sheet-confirm-btn" onclick="switchMobileTab('home')" style="max-width: 220px; margin: 16px auto 0; padding: 10px 18px;">
+                  استكشف المنتجات الطازجة
+                </button>
+              </div>
+
+              <!-- Favorites Grid -->
+              <div class="products-grid" id="favorites-screen-grid" style="margin-top: 14px;"></div>
+            </section>
+
+            <section class="screen-view" id="screen-cart">
+              <div class="section-header">
+                <h3 class="section-title">🛒 سلة مشتريات تسوق</h3>
+              </div>
+
+              <!-- Motivational Free Delivery Bar (SRS v3 Section 2.2) -->
+              <div id="free-delivery-progress-wrap"></div>
+
+              <!-- Empty State -->
+              <div class="empty-state" id="empty-cart-state">
+                <div class="empty-icon">🧺</div>
+                <h3>سلتك فارغة في تسوق</h3>
+                <p>تصفح الأصناف الطازجة وأضف ما تحتاجه بضغطة زر</p>
+                <button class="sheet-confirm-btn" onclick="switchMobileTab('home')" style="max-width: 200px; margin: 0 auto; padding: 10px;">
+                  ابدأ التسوق الآن
+                </button>
+              </div>
+
+              <!-- Cart Items List -->
+              <div class="cart-items-list" id="cart-items-container"></div>
+
+              <!-- Cart Summary & Checkout Details -->
+              <div id="cart-summary-section" style="display: none;">
+                <!-- Customer Details Card -->
+                <div class="checkout-card">
+                  <h4><span>👤</span> <span>بيانات التوصيل والمنطقة</span></h4>
+                  
+                  <!-- Zone Selector (SRS v3 Section 2.2) -->
+                  <div class="form-group">
+                    <label>منطقة / حي التوصيل</label>
+                    <select class="form-input" id="checkout-zone-select" onchange="changeDeliveryZone(this.value)">
+                      <!-- Injected via app.js -->
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label>الاسم الكريم</label>
+                    <input type="text" class="form-input" id="checkout-name" value="" placeholder="اسم العميل">
+                  </div>
+                  <div class="form-group">
+                    <label id="lbl-checkout-phone">رقم الهاتف (واتساب)</label>
+                    <input type="tel" class="form-input" id="checkout-phone" value="" placeholder="مثال: 77XXXXXXX">
+                  </div>
+                  <div class="form-group">
+                    <label id="lbl-checkout-address">تفاصيل العنوان (الحي، الشارع، المعلم، الشقة)</label>
+                    <input type="text" class="form-input" id="checkout-address" value="حي الأندلس، شارع الستين، جوار صيدلية الأمل، عمارة النصر شقة 3" placeholder="مثال: حي الأندلس، شارع الستين، عمارة النور شقة 4">
+                  </div>
+                  <div class="form-group">
+                    <label>رابط الموقع الجغرافي</label>
+                    <div class="location-input-row">
+                      <input type="text" class="form-input" id="checkout-location" value="https://maps.google.com/?q=15.3694,44.1910" placeholder="رابط خرائط جوجل">
+                      <button class="gps-locate-btn" type="button" onclick="simulateGpsLocation()">
+                        <span>📍</span> <span>تحديد عبر GPS</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>ملاحظات التوصيل (اختياري)</label>
+                    <input type="text" class="form-input" id="checkout-notes" value="" placeholder="تفاصيل العنوان...">
+                  </div>
+                </div>
+
+                <!-- Bill Breakdown per SRS v3 Section 2.2 -->
+                <div class="bill-summary">
+                  <div class="bill-row">
+                    <span>إجمالي المنتجات:</span>
+                    <span id="cart-subtotal">0.00 ر.ي</span>
+                  </div>
+                  <div class="bill-row">
+                    <span>رسوم التوصيل:</span>
+                    <span id="cart-delivery-fee">5.00 ر.ي</span>
+                  </div>
+                  <div class="bill-row total-row">
+                    <span>الإجمالي النهائي:</span>
+                    <span id="cart-grand-total">0.00 ر.ي</span>
+                  </div>
+                </div>
+
+                <!-- CTA Button -->
+                <button class="whatsapp-submit-btn" id="whatsapp-order-cta" onclick="executeCheckout()">
+                  <span>إتمام الطلب عبر واتساب</span> 💬
+                </button>
+              </div>
+            </section>
+
+            <!-- TAB 4: ORDERS HISTORY -->
+            <section class="screen-view" id="screen-orders">
+              <div class="section-header">
+                <h3 class="section-title">📦 طلباتي في تسوق</h3>
+                <span class="section-badge">متابعة فورية</span>
+              </div>
+              <div id="orders-history-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            </section>
+
+            <!-- TAB 5: SETTINGS & SUPPORT -->
+            <section class="screen-view" id="screen-settings">
+              <div class="section-header">
+                <h3 class="section-title">⚙️ الإعدادات والدعم الفني</h3>
+              </div>
+
+              <div class="settings-section-card">
+                <div class="settings-section-title">التفضيلات</div>
+                <div class="settings-row">
+                  <div class="settings-label-wrap">
+                    <span class="settings-icon">🌐</span>
+                    <div>
+                      <div class="settings-row-title">لغة التطبيق</div>
+                      <div class="settings-row-sub">تبديل فوري بين العربية والإنجليزية</div>
+                    </div>
+                  </div>
+                  <select id="mobile-lang-select" class="form-input" style="width: auto; padding: 4px 10px;" onchange="applyLang(this.value)">
+                    <option value="ar">العربية (RTL)</option>
+                    <option value="en">English (LTR)</option>
+                  </select>
+                </div>
+
+                <div class="settings-row">
+                  <div class="settings-label-wrap">
+                    <span class="settings-icon">🎨</span>
+                    <div>
+                      <div class="settings-row-title">المظهر (Theme)</div>
+                      <div class="settings-row-sub">نهاري / ليلي ناعم</div>
+                    </div>
+                  </div>
+                  <select id="mobile-theme-select" class="form-input" style="width: auto; padding: 4px 10px;" onchange="applyTheme(this.value)">
+                    <option value="light">نهاري (Light)</option>
+                    <option value="dark">ليلي (Dark)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="settings-section-card">
+                <div class="settings-section-title">الدعم الفني والشكاوى</div>
+                <div style="background: var(--bg-surface-secondary); padding: 10px; border-radius: var(--radius-sm); margin-bottom: 12px; font-size: 0.78rem;">
+                  <div>🕒 <b>ساعات العمل:</b> يومياً من 7:00 ص حتى 12:00 منتصف الليل</div>
+                  <div style="margin-top: 4px;">💬 <b>واتساب خدمة العملاء:</b> +967 770001122</div>
+                </div>
+
+                <button class="sheet-confirm-btn" onclick="openComplaintModal()" style="margin-bottom: 14px; background: var(--bg-surface-secondary); color: var(--text-main); border: 1.5px dashed var(--primary-500); box-shadow: none;">
+                  <span>📝 تقديم شكوى أو بلاغ جديد</span>
+                </button>
+
+                <h5 style="font-size: 0.82rem; font-weight: 800; margin-bottom: 8px;">متابعة شكاواي السابقة:</h5>
+                <div id="my-complaints-list"></div>
+              </div>
+
+              <div class="settings-section-card">
+                <div class="settings-section-title">الأسئلة الشائعة (FAQ)</div>
+                <div id="faqs-container"></div>
+              </div>
+
+              <div style="text-align: center; font-size: 0.72rem; color: var(--text-subtle); padding: 10px 0;">
+                تسوق (Taswoq) v1.0.0 • Eng.Al-ParatY + Flutter & Web Admin
+              </div>
+            </section>
+
+          </div>
+
+          <!-- Quantity Bottom Sheet (Section 2.1.1) -->
+          <div class="sheet-backdrop" id="sheet-backdrop" onclick="if(event.target === this) closeQuantitySheet()">
+            <div class="quantity-bottom-sheet">
+              <div class="drag-handle"></div>
+
+              <div class="sheet-product-preview">
+                <img src="" id="sheet-thumb" class="sheet-thumb" alt="Product">
+                <div class="sheet-info">
+                  <h4 id="sheet-title">اسم المنتج</h4>
+                  <div class="sheet-unit" id="sheet-unit">وحدة القياس</div>
+                  <div class="sheet-price-row">
+                    <span class="sheet-current-price" id="sheet-price">0.00 ر.ي</span>
+                    <span class="sheet-old-price" id="sheet-old-price"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="stepper-container">
+                <button class="stepper-btn" id="stepper-minus-btn" onclick="changeSheetQty(-1)">−</button>
+                <span class="stepper-qty" id="stepper-qty">1</span>
+                <button class="stepper-btn" id="stepper-plus-btn" onclick="changeSheetQty(1)">+</button>
+              </div>
+
+              <div class="quick-qty-pills">
+                <button class="quick-pill" data-val="1" onclick="setQuickQty(1)">1</button>
+                <button class="quick-pill" data-val="2" onclick="setQuickQty(2)">2</button>
+                <button class="quick-pill" data-val="5" onclick="setQuickQty(5)">5</button>
+                <button class="quick-pill" data-val="10" onclick="setQuickQty(10)">10</button>
+              </div>
+
+              <div class="sheet-total-display">
+                <span>السعر الإجمالي:</span>
+                <span class="sheet-total-amount" id="sheet-total-amount">0.00 ر.ي</span>
+              </div>
+
+              <button class="sheet-confirm-btn" id="sheet-confirm-btn" onclick="confirmSheetAdd()">
+                <span>إضافة للسلة — 0.00 ر.ي</span> 🛒
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom Navigation Bar -->
+                    <!-- Mandatory Location Permission Dialog (Android System Style) -->
+          <div class="location-perm-overlay" id="location-perm-overlay" style="display: none !important;">
+            <div class="location-perm-card">
+              <div class="location-perm-logo-wrap">
+                <img src="taswoq_logo.png" class="location-perm-official-logo" style="width: 76px !important; height: 76px !important; min-width: 76px !important; max-width: 76px !important; border-radius: 50% !important; object-fit: cover !important; border: 2.5px solid #f59e0b !important; box-shadow: 0 6px 18px rgba(6, 61, 46, 0.28) !important; display: block !important; margin: 0 auto !important;" alt="شعار تسوق الرسمي">
+              </div>
+              <h3 class="location-perm-title">السماح لتطبيق «تسوق» بالوصول إلى الموقع الجغرافي لهذا الجهاز؟</h3>
+              <p class="location-perm-desc">
+                يلزم تفعيل الموقع لتحديد عنوان التوصيل بدقة وحساب مسافة التوصيل وضمان وصول طلباتك الطازجة في 15 – 25 دقيقة.
+              </p>
+              <div class="location-perm-buttons">
+                <button class="loc-choice-btn primary" onclick="handleLocationChoice('whileInUse')">
+                  <span>أثناء استخدام التطبيق</span>
+                </button>
+                <button class="loc-choice-btn secondary" onclick="handleLocationChoice('onlyThisTime')">
+                  <span>هذه المرة فقط</span>
+                </button>
+                <button class="loc-choice-btn danger" onclick="handleLocationChoice('deny')">
+                  <span>عدم السماح</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <nav class="mobile-bottom-nav">
+            <button class="nav-item active" data-tab="home" onclick="switchMobileTab('home')">
+              <span class="nav-item-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 3L2 12h3v8h5v-5h4v5h5v-8h3L12 3z"/>
+                </svg>
+              </span>
+              <span class="nav-item-label">الرئيسية</span>
+            </button>
+            <button class="nav-item" data-tab="categories" onclick="switchMobileTab('categories')">
+              <span class="nav-item-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="7" height="7" rx="2"/>
+                  <rect x="14" y="3" width="7" height="7" rx="2"/>
+                  <rect x="14" y="14" width="7" height="7" rx="2"/>
+                  <rect x="3" y="14" width="7" height="7" rx="2"/>
+                </svg>
+              </span>
+              <span class="nav-item-label">الأقسام</span>
+            </button>
+      <button class="nav-item" data-tab="favorites" onclick="switchMobileTab('favorites')" title="المفضلة">
+        <span class="nav-item-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+          <span class="nav-badge" id="nav-fav-badge" style="display: none;">0</span>
+        </span>
+        <span>المفضلة</span>
+      </button>
+            <button class="nav-item" data-tab="cart" onclick="switchMobileTab('cart')">
+              <span class="nav-item-icon" style="position: relative;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="9" cy="21" r="1"/>
+                  <circle cx="20" cy="21" r="1"/>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+                <span class="nav-cart-badge" id="cart-badge-count" style="display: none;">0</span>
+              </span>
+              <span class="nav-item-label">السلة</span>
+            </button>
+            <button class="nav-item" data-tab="orders" onclick="switchMobileTab('orders')">
+              <span class="nav-item-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                  <line x1="12" y1="22.08" x2="12" y2="12"/>
+                </svg>
+              </span>
+              <span class="nav-item-label">طلباتي</span>
+            </button>
+            <button class="nav-item" data-tab="settings" onclick="switchMobileTab('settings')">
+              <span class="nav-item-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+              </span>
+              <span class="nav-item-label">الإعدادات</span>
+            </button>
+          </nav>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. DESKTOP WEB ADMIN DASHBOARD (SRS v3 Section 3 & 4) -->
+    <div class="admin-dashboard-wrapper" id="admin-dashboard-wrapper">
+      
+      <!-- Admin Sidebar -->
+      <aside class="admin-sidebar">
+        <div class="admin-brand">
+          <img src="assets/images/taswoq_logo.png" class="brand-logo-icon" alt="شعار تسوق" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; box-shadow: 0 3px 10px rgba(217, 119, 6, 0.25);">
+          <div>
+            <div style="font-weight: 800; font-size: 1rem;">تسوق أدمن</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted);">لوحة تحكم الإدارة والأرباح</div>
+          </div>
+        </div>
+
+        <ul class="admin-nav-list">
+          <li>
+            <button class="admin-nav-btn active" data-admin-sec="dashboard" onclick="switchAdminSection('dashboard')">
+              <span class="admin-nav-label"><span>📊</span> <span>المؤشرات والأرباح</span></span>
+            </button>
+          </li>
+          <li>
+            <button class="admin-nav-btn" data-admin-sec="orders" onclick="switchAdminSection('orders')">
+              <span class="admin-nav-label"><span>🛒</span> <span>إدارة الطلبات</span></span>
+              <span class="admin-pill-badge" id="admin-orders-pill-badge">1</span>
+            </button>
+          </li>
+          <li>
+            <button class="admin-nav-btn" data-admin-sec="products" onclick="switchAdminSection('products')">
+              <span class="admin-nav-label"><span>📦</span> <span>المنتجات والمخزون</span></span>
+            </button>
+          </li>
+          <li>
+            <button class="admin-nav-btn" data-admin-sec="banners" onclick="switchAdminSection('banners')">
+              <span class="admin-nav-label"><span>🎉</span> <span>عروض وسلايدر الإعلانات</span></span>
+            </button>
+          </li>
+          <li>
+            <button class="admin-nav-btn" data-admin-sec="delivery" onclick="switchAdminSection('delivery')">
+              <span class="admin-nav-label"><span>🚚</span> <span>رسوم التوصيل والمناطق</span></span>
+            </button>
+          </li>
+          <li>
+            <button class="admin-nav-btn" data-admin-sec="complaints" onclick="switchAdminSection('complaints')">
+              <span class="admin-nav-label"><span>⚠️</span> <span>الشكاوى والدعم</span></span>
+              <span class="admin-pill-badge" id="admin-complaints-pill-badge" style="background: var(--accent-600);">1</span>
+            </button>
+          </li>
+          <li>
+            <button class="admin-nav-btn" data-admin-sec="expenses" onclick="switchAdminSection('expenses')">
+              <span class="admin-nav-label"><span>💸</span> <span>المصروفات التشغيلية</span></span>
+            </button>
+          </li>
+          <li>
+            <button class="admin-nav-btn" data-admin-sec="whatsapp" onclick="switchAdminSection('whatsapp')">
+              <span class="admin-nav-label"><span>📱</span> <span>أرقام الواتساب</span></span>
+            </button>
+          </li>
+          <li>
+            <button class="admin-nav-btn" data-admin-sec="settings" onclick="switchAdminSection('settings')">
+              <span class="admin-nav-label"><span>⚙️</span> <span>الإعدادات العامة</span></span>
+            </button>
+          </li>
+        </ul>
+
+        <div class="admin-sidebar-footer">
+          <div class="admin-user-avatar">خ</div>
+          <div>
+            <div style="font-size: 0.82rem; font-weight: 800;" class="header-user-role-name">إدارة تسوق</div>
+            <div style="font-size: 0.7rem; color: var(--text-muted);" class="admin-google-status-badge">
+              <span style="display: inline-flex; align-items: center; gap: 4px; background: #e0f2fe; color: #0369a1; padding: 1px 6px; border-radius: 10px; font-size: 0.68rem; font-weight: 800;">
+                <svg viewBox="0 0 24 24" width="11" height="11"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                موثق عبر Google
+              </span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Admin Main Content Area -->
+      <div class="admin-main-content">
+        
+        <!-- DELEGATE SIMULATION NOTICE BANNER -->
+        <div id="delegate-role-active-banner" style="display: none; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 10px 16px; margin-bottom: 4px; align-items: center; justify-content: space-between; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.25rem;">👤</span>
+            <div>
+              <div style="font-weight: 800; font-size: 0.88rem; color: #92400e;">
+                أنت مسجل حالياً بحساب: <span id="delegate-banner-name">المندوب</span>
+              </div>
+              <div style="font-size: 0.74rem; color: #b45309;">
+                تم تقييد الصلاحيات وحجب الأرباح وتكاليف الشراء وفقاً للأذونات المحددة من قبل المدير العام.
+              </div>
+            </div>
+          </div>
+          <button class="action-btn primary" onclick="returnToAdminUser()" style="background: #d97706; border-color: #d97706; font-size: 0.8rem; padding: 6px 14px;">
+            العودة لحساب المدير العام ↩️
+          </button>
+        </div>
+
+        <!-- SECTION A: DASHBOARD & KPIS -->
+        <div class="admin-view-panel" id="admin-sec-dashboard">
+          <div class="admin-top-bar">
+            <div class="admin-heading">
+              <h2>مؤشرات تسوق وحساب صافي الأرباح</h2>
+              <p>متابعة مبيعات الأصناف، تكلفة الشراء، رسوم التوصيل، المصروفات التشغيلية، وصافي الربح المحقق لحظياً</p>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="ctrl-btn" onclick="openGoogleSignInModal()" title="تسجيل الدخول أو التحقق بحساب Google للمدير">
+                <svg viewBox="0 0 24 24" width="14" height="14" style="vertical-align: middle;"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                <span>دخول المدير (Google)</span>
+              </button>
+              <button class="ctrl-btn" id="index-export-report-btn" onclick="exportAdminReportCSV()" title="تحميل تقرير المبيعات والأرباح والمصروفات بصيغة CSV تدعم Excel">
+                <span>📥 تصدير Excel/CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Formula Banner per SRS v3 Section 3.1 -->
+          <div class="formula-banner">
+            <div>
+              <span>💡 <b>معادلة حساب صافي الربح المعتمدة (SRS v3 المحاسبية):</b> </span>
+              <span class="formula-text">صافي الربح الحقيقي = (مبيعات المنتجات − تكلفة الشراء) − المصروفات التشغيلية (Eng. AL-ParatY)</span>
+            </div>
+            <span class="brand-badge">دقة محاسبية معتمدة</span>
+          </div>
+
+          <!-- DATE QUERY & PROFIT FILTER CARD (استعلام وتصفية الأرباح حسب التاريخ) -->
+          <div class="profit-query-card" id="profit-query-card">
+            <div class="profit-query-header">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="profit-query-icon">📅</div>
+                <div>
+                  <div style="font-weight: 800; font-size: 0.98rem; color: var(--text-main);">
+                    استعلام وتصفية الأرباح والمؤشرات المالية حسب التاريخ
+                  </div>
+                  <div style="font-size: 0.77rem; color: var(--text-muted); margin-top: 2px;">
+                    حدد الفترة المحاسبية أو اختر نطاق تاريخ محدد لحساب المبيعات، تكلفة الشراء، المصروفات وصافي الأرباح
+                  </div>
+                </div>
+              </div>
+              <div class="profit-query-actions">
+                <button type="button" class="action-btn primary export-report-btn" onclick="exportAdminReportCSV()" title="تصدير تقرير أرباح الفترة المحددة بصيغة CSV" style="font-weight: 800; font-size: 0.8rem; padding: 7px 14px; border-radius: 9px; display: inline-flex; align-items: center; gap: 6px;">
+                  <span>📑</span> <span>تصدير تقرير الفترة CSV</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Quick Filter Presets -->
+            <div class="profit-presets-wrapper">
+              <span style="font-size: 0.78rem; font-weight: 800; color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px;">
+                <span>⚡</span> الفترات السريعة:
+              </span>
+              <div class="profit-preset-group">
+                <button type="button" class="profit-preset-btn active" data-period="all" onclick="setProfitDateFilter('all')">
+                  <span>🌟</span> الكل
+                </button>
+                <button type="button" class="profit-preset-btn" data-period="today" onclick="setProfitDateFilter('today')">
+                  <span>⚡</span> أرباح اليوم
+                </button>
+                <button type="button" class="profit-preset-btn" data-period="yesterday" onclick="setProfitDateFilter('yesterday')">
+                  <span>⏮️</span> أرباح الأمس
+                </button>
+                <button type="button" class="profit-preset-btn" data-period="week" onclick="setProfitDateFilter('week')">
+                  <span>📊</span> آخر 7 أيام
+                </button>
+                <button type="button" class="profit-preset-btn" data-period="month" onclick="setProfitDateFilter('month')">
+                  <span>🗓️</span> هذا الشهر
+                </button>
+                <button type="button" class="profit-preset-btn" data-period="last_month" onclick="setProfitDateFilter('last_month')">
+                  <span>📉</span> الشهر السابق
+                </button>
+                <button type="button" class="profit-preset-btn" data-period="year" onclick="setProfitDateFilter('year')">
+                  <span>🎯</span> هذا العام
+                </button>
+              </div>
+            </div>
+
+            <!-- Custom Date Range Form -->
+            <div class="profit-custom-date-bar">
+              <div class="date-input-group">
+                <label for="profit-date-start">من تاريخ:</label>
+                <input type="date" id="profit-date-start" class="form-input profit-date-input" aria-label="تاريخ البداية">
+              </div>
+              <div class="date-input-group">
+                <label for="profit-date-end">إلى تاريخ:</label>
+                <input type="date" id="profit-date-end" class="form-input profit-date-input" aria-label="تاريخ النهاية">
+              </div>
+              <div class="date-btn-group">
+                <button type="button" class="action-btn primary" onclick="applyCustomProfitDateFilter()" style="padding: 6px 14px; font-size: 0.8rem; font-weight: 800;">
+                  <span>🔍</span> <span>استعلام وتطبيق</span>
+                </button>
+                <button type="button" class="ctrl-btn" onclick="resetProfitDateFilter()" title="إعادة تعيين إلى كافة الفترات" style="padding: 6px 12px; font-size: 0.8rem;">
+                  <span>🔄</span> <span>إلغاء التصفية</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Active Filter Indicator Banner -->
+            <div class="profit-active-status-bar" id="profit-active-status-bar">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span class="status-indicator-dot"></span>
+                <span id="profit-query-status-text" style="font-weight: 700; font-size: 0.82rem; color: var(--text-main);">
+                  <strong>نطاق الاستعلام النشط:</strong> كافة الفترات المسجلة
+                </span>
+              </div>
+              <div id="profit-query-count-badge" class="profit-query-count-badge">
+                <span>🛍️ جاري التحميل...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPI Grid with 6 Cards (Including Expenses) -->
+          <div class="kpi-cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+            <!-- 1. Total Orders -->
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">إجمالي طلبات الفترة</span>
+                <span class="kpi-icon-badge">🛍️</span>
+              </div>
+              <div class="kpi-value" id="kpi-orders-count">2</div>
+              <div class="kpi-sub"><span class="kpi-trend-up">↑ نشط</span> <span>طلبات واردة</span></div>
+            </div>
+
+            <!-- 2. Gross Sales -->
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">مبيعات المنتجات</span>
+                <span class="kpi-icon-badge">💰</span>
+              </div>
+              <div class="kpi-value" id="kpi-sales-amount">121.20 ر.ي</div>
+              <div class="kpi-sub"><span>مجموع قيم الأصناف فقط</span></div>
+            </div>
+
+            <!-- 3. Delivery Fees Collected -->
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">رسوم التوصيل المحصلة</span>
+                <span class="kpi-icon-badge">🚚</span>
+              </div>
+              <div class="kpi-value" id="kpi-delivery-collected" style="color: var(--info);">5.00 ر.ي</div>
+              <div class="kpi-sub"><span>مستثناة من صافي الربح ومخصصة إلى Eng. AL-ParatY</span></div>
+            </div>
+
+            <!-- 4. Total Cost -->
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">إجمالي تكلفة الشراء</span>
+                <span class="kpi-icon-badge">🏷️</span>
+              </div>
+              <div class="kpi-value" id="kpi-cost-amount">79.50 ر.ي</div>
+              <div class="kpi-sub"><span>تكلفة المنتجات الفعلية</span></div>
+            </div>
+
+            <!-- 5. Operating Expenses -->
+            <div class="kpi-card" style="border: 1px solid rgba(239, 68, 68, 0.2); background: linear-gradient(180deg, var(--bg-surface) 0%, rgba(239, 68, 68, 0.04) 100%);">
+              <div class="kpi-header">
+                <span class="kpi-title">المصروفات التشغيلية</span>
+                <span class="kpi-icon-badge" style="background: rgba(239, 68, 68, 0.12); color: #ef4444;">💸</span>
+              </div>
+              <div class="kpi-value" id="kpi-expense-amount" style="color: #ef4444;">185.00 ر.ي</div>
+              <div class="kpi-sub"><span id="kpi-expense-sub">وقود، صيانة، كراتين، إيجار</span></div>
+            </div>
+
+            <!-- 6. Net Profit (Highlighted) -->
+            <div class="kpi-card profit-card">
+              <div class="kpi-header">
+                <span class="kpi-title">صافي الربح الفعلي</span>
+                <span class="kpi-icon-badge">✨</span>
+              </div>
+              <div class="kpi-value" id="kpi-profit-amount">41.70 ر.ي</div>
+              <div class="kpi-sub"><span class="kpi-trend-up" id="kpi-profit-margin">هامش الربح: 34.4%</span></div>
+            </div>
+          </div>
+
+          <!-- Chart Card -->
+          <div class="admin-chart-card">
+            <div class="chart-header">
+              <div style="font-weight: 800; font-size: 0.95rem;">مقارنة المبيعات وصافي الأرباح لطلبات الفترة المحددة</div>
+              <div style="display: flex; gap: 12px; font-size: 0.75rem;">
+                <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--info); border-radius: 2px;"></span> المبيعات</span>
+                <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--primary-500); border-radius: 2px;"></span> صافي الربح</span>
+              </div>
+            </div>
+            <div class="chart-bars-wrap" id="admin-chart-bars"></div>
+          </div>
+
+          <!-- DATE BREAKDOWN LEDGER TABLE (كشف تفاصيل الأرباح والمبيعات حسب اليوم والتاريخ) -->
+          <div class="admin-chart-card profit-breakdown-card" style="margin-top: 20px;">
+            <div class="chart-header" style="flex-wrap: wrap; gap: 12px;">
+              <div>
+                <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+                  <span>📊</span>
+                  <span>كشف تفاصيل الأرباح والمبيعات حسب اليوم والتاريخ</span>
+                </div>
+                <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">
+                  تحليل محاسبي يومي يوضح المبيعات، تكلفة البضاعة، المصروفات التشغيلية، وصافي الأرباح المحققة للفترة المحددة
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" class="ctrl-btn" onclick="window.print()" style="font-size: 0.78rem; padding: 6px 12px; font-weight: 700;">
+                  <span>🖨️</span> <span>طباعة الكشف</span>
+                </button>
+              </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+              <table class="modern-table profit-ledger-table" style="width: 100%; font-size: 0.82rem;">
+                <thead>
+                  <tr>
+                    <th>اليوم / التاريخ 📅</th>
+                    <th>عدد الطلبات 🛍️</th>
+                    <th>مبيعات المنتجات 💰</th>
+                    <th>تكلفة الشراء 🏷️</th>
+                    <th>المصروفات التشغيلية 💸</th>
+                    <th>رسوم التوصيل (مستثناة إلى Eng. AL-ParatY) 🚚</th>
+                    <th>صافي الربح الفعلي ✨</th>
+                    <th>هامش الربح %</th>
+                    <th>الحالة المحاسبية 📌</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-profit-breakdown-tbody">
+                  <!-- Dynamically populated by renderAdminProfitBreakdownTable -->
+                </tbody>
+                <tfoot id="admin-profit-breakdown-tfoot" style="background: var(--bg-surface); font-weight: 800; border-top: 2px solid var(--border-subtle);">
+                  <!-- Total summary row -->
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION B: ORDERS MANAGEMENT -->
+        <div class="admin-view-panel" id="admin-sec-orders" style="display: none;">
+          <div class="admin-top-bar">
+            <div class="admin-heading">
+              <h2>إدارة وتتبع الطلبات</h2>
+              <p>تغيير حالة الطلب وتفاصيل الأصناف ورسوم التوصيل</p>
+            </div>
+          </div>
+          <div class="data-table-card">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>رقم الطلب</th>
+                  <th>العميل</th>
+                  <th>الأصناف</th>
+                  <th>قيمة المنتجات</th>
+                  <th>رسوم التوصيل</th>
+                  <th>صافي الربح</th>
+                  <th>الحالة</th>
+                  <th>الموقع</th>
+                </tr>
+              </thead>
+              <tbody id="admin-orders-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SECTION C: DELIVERY SETTINGS & ZONES (SRS v3 Section 3.8) -->
+        <div class="admin-view-panel" id="admin-sec-delivery" style="display: none;">
+          <div class="admin-top-bar">
+            <div class="admin-heading">
+              <h2>إدارة رسوم التوصيل والمناطق (SRS v3)</h2>
+              <p>التحكم في الرسوم الأساسية، التوصيل المجاني، الحد الأدنى، وتسعير الأحياء</p>
+            </div>
+            <button class="sheet-confirm-btn" style="width: auto; padding: 8px 18px;" onclick="saveDeliverySettings()">
+              <span>حفظ الإعدادات 💾</span>
+            </button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            <!-- General Delivery Rules -->
+            <div class="settings-section-card">
+              <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 14px;">قواعد التسعير العامة</h4>
+              
+              <div class="form-group">
+                <label>الرسوم الأساسية للتوصيل (ر.ي)</label>
+                <input type="number" step="0.5" class="form-input" id="admin-base-fee" value="5.00">
+              </div>
+
+              <div class="form-group">
+                <label>توصيل مجاني للطلبات فوق (ر.ي) [فارغ = معطل]</label>
+                <input type="number" step="1" class="form-input" id="admin-free-above" value="50.00" placeholder="مثال: 50.00">
+              </div>
+
+              <div class="form-group">
+                <label>الحد الأدنى للطلب (ر.ي) [فارغ = لا يوجد]</label>
+                <input type="number" step="1" class="form-input" id="admin-min-order" value="15.00" placeholder="مثال: 15.00">
+              </div>
+
+              <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--border-subtle);">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.84rem;">حالة خدمة التوصيل</div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted);">إيقاف التوصيل مؤقتاً عند الحاجة</div>
+                </div>
+                <input type="checkbox" id="admin-delivery-enabled" checked style="width: 20px; height: 20px; accent-color: var(--primary-600);">
+              </div>
+            </div>
+
+            <!-- Delivery Zones Management -->
+            <div class="settings-section-card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                <h4 style="font-size: 0.95rem; font-weight: 800; margin: 0;">تسعير مناطق وأحياء التوصيل</h4>
+                <button class="action-btn primary" onclick="openAddZoneModal()" style="font-size: 0.8rem; padding: 6px 12px;">
+                  <span>+ إضافة حي/منطقة جديدة</span>
+                </button>
+              </div>
+              <div class="data-table-card" style="margin-bottom: 0;">
+                <table class="modern-table">
+                  <thead>
+                    <tr>
+                      <th>المنطقة / الحي</th>
+                      <th>رسوم التوصيل</th>
+                      <th>الحالة</th>
+                      <th>الإجراءات والتحكم</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-zones-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION D: PRODUCTS & INVENTORY CRUD -->
+        <div class="admin-view-panel" id="admin-sec-products" style="display: none;">
+          <div class="admin-top-bar">
+            <div class="admin-heading">
+              <h2>إدارة منتجات ومخزون تسوق</h2>
+              <p>أسعار التكلفة وسعر البيع وهوامش الربح وتصنيف المنتجات حسب الأقسام</p>
+            </div>
+            <button class="ctrl-btn" onclick="openAddProductModal()" style="font-weight: 800; background: var(--primary-50); border-color: var(--primary-500);">
+              <span>➕ إضافة منتج جديد</span>
+            </button>
+          </div>
+
+          <!-- Categories Filter & Search Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+            <div id="admin-prod-cat-filters" style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; max-width: 100%;"></div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <input type="text" class="form-input" placeholder="🔍 بحث في المنتجات بالاسم أو القسم..." oninput="onAdminProductSearch(this.value)" style="width: 250px; font-size: 0.82rem; padding: 6px 12px;">
+            </div>
+          </div>
+
+          <div class="data-table-card">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>الصورة</th>
+                  <th>الاسم والوحدة</th>
+                  <th>سعر التكلفة</th>
+                  <th>سعر البيع</th>
+                  <th>سعر الخصم</th>
+                  <th>هامش الربح</th>
+                  <th>حالة التوفر</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="admin-products-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SECTION E: PROMOTIONAL BANNERS & CAROUSEL -->
+        <div class="admin-view-panel" id="admin-sec-banners" style="display: none;">
+          <div class="admin-top-bar">
+            <div class="admin-heading">
+              <h2>إدارة عروض وسلايدر الإعلانات المتحركة</h2>
+              <p>التحكم في البنرات الإعلانية التي تظهر في الصفحة الرئيسية للتطبيق وبثها فورياً كإشعارات للعملاء</p>
+            </div>
+            <button class="action-btn primary" onclick="openAddBannerModal()">
+              <span>+ إضافة بنر إعلاني جديد</span>
+            </button>
+          </div>
+          <div class="data-table-card">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>معاينة البنر</th>
+                  <th>عنوان العرض والوسم</th>
+                  <th>الوصف الإعلاني</th>
+                  <th>حالة العرض</th>
+                  <th>الإجراءات والبث للإشعارات</th>
+                </tr>
+              </thead>
+              <tbody id="admin-banners-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SECTION: EXPENSES MANAGEMENT (المصروفات التشغيلية) -->
+        <div class="admin-view-panel" id="admin-sec-expenses" style="display: none;">
+          <div class="admin-top-bar">
+            <div class="admin-heading">
+              <h2>إدارة المصروفات التشغيلية والنثريات</h2>
+              <p>تسجيل مصروفات الوقود وصيانة الدبابات والكراتين والتغليف لخصمها من صافي الأرباح (SRS v3)</p>
+            </div>
+            <button class="action-btn primary" onclick="document.getElementById('exp-input-amount').focus()">
+              <span>+ تسجيل سند صرف جديد</span>
+            </button>
+          </div>
+
+          <!-- Expense Summary KPI Cards -->
+          <div class="kpi-cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 20px;">
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">مصروفات اليوم</span>
+                <span class="kpi-icon-badge">📅</span>
+              </div>
+              <div class="kpi-value" id="kpi-exp-today" style="color: #ef4444;">0.00 ر.ي</div>
+              <div class="kpi-sub"><span>تحديث مباشر</span></div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">إجمالي المصروفات المسجلة</span>
+                <span class="kpi-icon-badge">💸</span>
+              </div>
+              <div class="kpi-value" id="kpi-exp-total" style="color: #ef4444;">185.00 ر.ي</div>
+              <div class="kpi-sub"><span>تخصم من صافي الأرباح</span></div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">بند وقود الدبابات</span>
+                <span class="kpi-icon-badge">⛽</span>
+              </div>
+              <div class="kpi-value" id="kpi-exp-fuel">45.00 ر.ي</div>
+              <div class="kpi-sub"><span>بنزين دبابات التوصيل</span></div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">الصيانة والتغليف والمؤن</span>
+                <span class="kpi-icon-badge">📦</span>
+              </div>
+              <div class="kpi-value" id="kpi-exp-maint">140.00 ر.ي</div>
+              <div class="kpi-sub"><span>كراتين، إيجار، نثريات</span></div>
+            </div>
+          </div>
+
+          <!-- Quick Add Expense Card -->
+          <div class="settings-section-card" style="margin-bottom: 20px;">
+            <h4 style="font-size: 1rem; font-weight: 800; margin: 0 0 14px 0; display: flex; align-items: center; gap: 8px;">
+              <span>📝</span> <span>تسجيل سند صرف / مصروف تشغيلي جديد</span>
+            </h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) 1.5fr auto; gap: 12px; align-items: flex-end;">
+              <div class="form-group">
+                <label style="font-weight: 700; font-size: 0.8rem; margin-bottom: 4px; display: block;">بند / تصنيف المصروف *</label>
+                <select id="exp-input-category" class="form-input">
+                  <option value="fuel">وقود وبنزين دبابات ⛽</option>
+                  <option value="packaging">كراتين وأكياس وتغليف 📦</option>
+                  <option value="maintenance">صيانة وإصلاح دبابات 🔧</option>
+                  <option value="rent">إيجار وكهرباء وثلاجات 💡</option>
+                  <option value="wages">رواتب ويوميات عمال 👥</option>
+                  <option value="other">نثريات وضيافة وأخرى ☕</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label style="font-weight: 700; font-size: 0.8rem; margin-bottom: 4px; display: block;">المبلغ (ر.ي) *</label>
+                <input type="number" step="0.5" min="0" id="exp-input-amount" class="form-input" placeholder="0.00" style="font-weight: 800;">
+              </div>
+
+              <div class="form-group">
+                <label style="font-weight: 700; font-size: 0.8rem; margin-bottom: 4px; display: block;">طريقة الدفع *</label>
+                <select id="exp-input-payment" class="form-input">
+                  <option value="نقداً (كاش)">نقداً (كاش)</option>
+                  <option value="حوالة كريمي">حوالة كريمي</option>
+                  <option value="بنكك">بنكك</option>
+                  <option value="محفظة جوال">محفظة جوال</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label style="font-weight: 700; font-size: 0.8rem; margin-bottom: 4px; display: block;">البيان التفصيلي / المستلم *</label>
+                <input type="text" id="exp-input-desc" class="form-input" placeholder="مثال: وقود دراجة التوصيل، شراء أدوات تغليف...">
+              </div>
+
+              <button class="action-btn primary" onclick="saveExpense()" style="height: 42px; padding: 0 20px; font-weight: 800;">
+                <span>💸 حفظ سند الصرف</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Expenses Data Table -->
+          <div class="data-table-card">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>رقم السند</th>
+                  <th>التاريخ والوقت</th>
+                  <th>التصنيف</th>
+                  <th>البيان والتفاصيل</th>
+                  <th>المبلغ</th>
+                  <th>طريقة الدفع</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="admin-expenses-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SECTION F: COMPLAINTS & TICKETS -->
+        <div class="admin-view-panel" id="admin-sec-complaints" style="display: none;">
+          <div class="admin-top-bar">
+            <div class="admin-heading">
+              <h2>إدارة شكاوى وتذاكر عملاء تسوق</h2>
+              <p>متابعة البلاغات والرد عليها وتغيير حالتها</p>
+            </div>
+          </div>
+          <div class="data-table-card">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>رقم التذكرة</th>
+                  <th>العميل</th>
+                  <th>نوع الشكوى</th>
+                  <th>نص الشكوى</th>
+                  <th>الحالة</th>
+                  <th>الرد</th>
+                </tr>
+              </thead>
+              <tbody id="admin-complaints-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SECTION G: WHATSAPP RECIPIENTS -->
+        <div class="admin-view-panel" id="admin-sec-whatsapp" style="display: none;">
+          <div class="admin-top-bar">
+            <div class="admin-heading">
+              <h2>أرقام الواتساب واستقبال الطلبات (Round-Robin)</h2>
+              <p>توزيع طلبات تسوق بالتناوب بين فروع وأرقام الاستقبال</p>
+            </div>
+            <button class="ctrl-btn" onclick="openAddWhatsAppModal()" style="font-weight: 800; background: var(--primary-50); border-color: var(--primary-500);">
+              <span>➕ إضافة رقم جديد</span>
+            </button>
+          </div>
+          <div class="data-table-card">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>الرقم الدولي</th>
+                  <th>التسمية والفرع</th>
+                  <th>الحالة</th>
+                  <th>آخر استخدام</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="admin-whatsapp-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SECTION H: SETTINGS & APPEARANCE -->
+        <div class="admin-view-panel" id="admin-sec-settings" style="display: none;">
+          <div class="admin-top-bar">
+            <div class="admin-heading">
+              <h2>الإعدادات العامة وتفضيلات المظهر</h2>
+              <p>التحكم في مظهر لوحة التحكم (الوضع الليلي والنهاري)، وتنسيق الأرقام الإنجليزية، ومعلومات المتجر</p>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- CARD 1: THEME & APPEARANCE -->
+            <div class="settings-section-card">
+              <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 1.05rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <span>🎨</span> <span>مظهر وسمة لوحة التحكم (الوضع الليلي والنهاري)</span>
+                </h4>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+                  اختر الوضع اللوني المريح لك أثناء إدارة متجر تسوق:
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg-surface-secondary); border-radius: 12px; flex-wrap: wrap;">
+                <button class="action-btn primary" onclick="toggleTheme()" style="padding: 9px 20px; font-weight: 800; font-size: 0.9rem;">
+                  <span>🌙 / ☀️ تبديل الوضع الليلي / النهاري</span>
+                </button>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">يتم حفظ النمط تلقائياً في المتصفح</span>
+              </div>
+            </div>
+
+            <!-- CARD 2: NUMERALS & DIGITS FORMATTING -->
+            <div class="settings-section-card">
+              <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 1.05rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <span>🔢</span> <span>تنسيق الأرقام ورسوم التوصيل</span>
+                </h4>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+                  الأرقام الإنجليزية (0, 1, 2, 3, 4, 5, 6, 7, 8, 9) نشطة ومثبتة دائمًا في كل الجداول والرسوم:
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: var(--bg-surface-secondary); border-radius: 12px;">
+                <div style="font-weight: 800; font-size: 0.9rem;">لغة الأرقام في النظام</div>
+                <span class="brand-badge" style="background: var(--primary-50); color: var(--primary-700); font-weight: 900; font-size: 0.88rem; padding: 6px 14px; border: 1px solid var(--primary-300);">
+                  الإنجليزية (0-9) نشطة ومثبتة دائمًا ✅
+                </span>
+              </div>
+            </div>
+
+            <!-- CARD 3: DELEGATE ACCOUNTS & ACCESS PERMISSIONS (إدارة حسابات المناديب) -->
+            <div class="settings-section-card" id="admin-sec-delegates">
+              <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <h4 style="font-size: 1.05rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <span>👥</span> <span>إدارة حسابات المناديب وتفويض الصلاحيات (SRS v3)</span>
+                  </h4>
+                  <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+                    إنشاء وتفويض حسابات للمناديب للدخول إلى لوحة التحكم مع تحكم دقيق في الأذونات من قبل المدير
+                  </div>
+                </div>
+                <span class="brand-badge" style="background: var(--primary-50); color: var(--primary-700); font-weight: 800;">إدارة صلاحيات المدير</span>
+              </div>
+
+              <!-- Delegate Account Creation Form -->
+              <div style="background: var(--bg-surface-secondary); padding: 16px; border-radius: 12px; border: 1px solid var(--border-subtle); margin-bottom: 20px;">
+                <div style="font-weight: 800; font-size: 0.9rem; margin-bottom: 12px; color: var(--text-main);">➕ إنشاء وتفويض حساب مندوب جديد:</div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 14px;">
+                  <div class="form-group">
+                    <label style="font-weight: 700; font-size: 0.8rem; margin-bottom: 4px; display: block;">اسم المندوب الكامل *</label>
+                    <input type="text" id="del-input-name" class="form-input" placeholder="اسم المندوب">
+                  </div>
+                  <div class="form-group">
+                    <label style="font-weight: 700; font-size: 0.8rem; margin-bottom: 4px; display: block;">رقم الهاتف / اسم الدخول *</label>
+                    <input type="text" id="del-input-phone" class="form-input" placeholder="مثال: 77XXXXXXX" dir="ltr" style="text-align: left;">
+                  </div>
+                  <div class="form-group">
+                    <label style="font-weight: 700; font-size: 0.8rem; margin-bottom: 4px; display: block;">الرمز السري / PIN</label>
+                    <input type="password" id="del-input-pin" class="form-input" placeholder="1234">
+                  </div>
+                  <div class="form-group">
+                    <label style="font-weight: 700; font-size: 0.8rem; margin-bottom: 4px; display: block;">منطقة / حي التوصيل المعتمد</label>
+                    <select id="del-input-zone" class="form-input">
+                      <option value="حي الأندلس (المركز)">حي الأندلس (المركز)</option>
+                      <option value="حدة والمدينة السكنية">حدة والمدينة السكنية</option>
+                      <option value="شارع بغداد والجزائر">شارع بغداد والجزائر</option>
+                      <option value="حي المطار والنهضة">حي المطار والنهضة</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Granular Permissions Options -->
+                <div style="margin-bottom: 14px; background: var(--bg-surface); padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border-subtle);">
+                  <div style="font-weight: 800; font-size: 0.82rem; margin-bottom: 8px; color: var(--primary-700);">التصاريح والأذونات الممنوحة من قبل الـ Admin:</div>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; font-size: 0.8rem;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                      <input type="checkbox" id="del-perm-orders" checked>
+                      <span>استعراض وتحديث حالات الطلبات</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                      <input type="checkbox" id="del-perm-zone-only" checked>
+                      <span>حصر الطلبات الخاصة بحي المندوب فقط</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                      <input type="checkbox" id="del-perm-profits">
+                      <span>السماح برؤية الأرباح وتكلفة الشراء (معطل افتراضياً لحماية السرية)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                      <input type="checkbox" id="del-perm-products">
+                      <span>السماح بتعديل أسعار وتوفر المنتجات</span>
+                    </label>
+                  </div>
+                </div>
+
+                <button class="action-btn primary" onclick="createDelegateAccount()" style="font-weight: 800; padding: 8px 18px;">
+                  <span>➕ اعتماد حساب المندوب وتفعيل الصلاحيات</span>
+                </button>
+              </div>
+
+              <!-- Delegates Table -->
+              <div class="data-table-card" style="box-shadow: none; border: 1px solid var(--border-subtle);">
+                <table class="modern-table">
+                  <thead>
+                    <tr>
+                      <th>المندوب ورقم الاتصال</th>
+                      <th>الحي المخصص</th>
+                      <th>ملخص الصلاحيات</th>
+                      <th>الحالة</th>
+                      <th>الإجراءات وتجربة الدخول</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-delegates-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- WhatsApp Output Modal -->
+  <div class="modal-overlay" id="whatsapp-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-wa-title" style="font-size: 1rem; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+          <span>💬</span> <span>تم تسجيل الطلب وتجهيز رسالة واتساب (SRS v3)</span>
+        </h3>
+        <button class="ctrl-btn" onclick="closeWhatsAppModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: var(--primary-50); border: 1px solid var(--primary-500); padding: 10px 14px; border-radius: var(--radius-md); margin-bottom: 8px; font-size: 0.8rem; color: var(--primary-800); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+          <div><b id="modal-wa-phone-lbl">رقم تسوق المعتمد لاستقبال هذا الطلب:</b> <span id="modal-wa-phone" style="font-weight: 800;"></span></div>
+          <span id="modal-wa-dispatch-badge" style="font-size: 0.72rem; background: var(--primary-600); color: white; padding: 2px 8px; border-radius: var(--radius-full);">توزيع تلقائي ⚡</span>
+        </div>
+        <div id="modal-wa-address-box" style="background: var(--bg-surface-secondary); border: 1px solid var(--border-subtle); padding: 8px 12px; border-radius: var(--radius-md); margin-bottom: 12px; font-size: 0.78rem; display: flex; align-items: center; gap: 6px;">
+          <span>🏠</span> <b id="modal-wa-address-lbl">تفاصيل عنوان التوصيل:</b> <span id="modal-wa-address" style="color: var(--text-main); font-weight: 600;"></span>
+        </div>
+        <p id="modal-wa-preview-lbl" style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px;">
+          معاينة الرسالة المنسقة الجاهزة للإرسال:
+        </p>
+        <pre id="modal-wa-preview" style="background: var(--bg-surface-secondary); padding: 12px; border-radius: var(--radius-md); font-family: inherit; font-size: 0.8rem; white-space: pre-wrap; line-height: 1.6; border: 1px solid var(--border-subtle); max-height: 220px; overflow-y: auto; user-select: text; -webkit-user-select: text;"></pre>
+      </div>
+      <div class="modal-footer">
+        <button class="ctrl-btn" id="btn-copy-wa-modal" onclick="copyWhatsAppMessage()" style="font-weight: 700; padding: 10px 18px; display: flex; align-items: center; gap: 6px; border: 1.5px solid var(--border-highlight); cursor: pointer; transition: all 0.2s ease;">
+          <span id="btn-copy-wa-icon">📋</span> <span id="btn-copy-wa-text">نسخ نص الرسالة</span>
+        </button>
+        <a id="modal-wa-link" href="#" target="_blank" class="whatsapp-submit-btn" style="text-decoration: none; padding: 10px 20px; width: auto; font-size: 0.88rem;">
+          <span id="modal-wa-link-text">فتح تطبيق واتساب الآن</span> ↗
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Complaint Modal -->
+  <div class="modal-overlay" id="complaint-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="font-size: 1rem; font-weight: 800;">📝 تقديم شكوى أو بلاغ جديد</h3>
+        <button class="ctrl-btn" onclick="closeComplaintModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>نوع الشكوى</label>
+          <select class="form-input" id="complaint-type-select">
+            <option value="delay">تأخر التوصيل عن الموعد</option>
+            <option value="damaged">منتج ناقص أو تالف</option>
+            <option value="invoice">خطأ في الفاتورة أو الحساب</option>
+            <option value="staff">سلوك الموظف / مندوب التوصيل</option>
+            <option value="other">أخرى</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>الطلب المرتبط</label>
+          <select class="form-input" id="complaint-order-select"></select>
+        </div>
+        <div class="form-group">
+          <label>تفاصيل الشكوى (إلزامي)</label>
+          <textarea class="form-input" id="complaint-text" rows="3" placeholder="اشرح بالتفصيل ما حدث معك..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="ctrl-btn" onclick="closeComplaintModal()">إلغاء</button>
+        <button class="sheet-confirm-btn" style="width: auto; padding: 8px 18px;" onclick="submitComplaintForm()">
+          إرسال الشكوى 🚀
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT CRUD MODAL -->
+  <div class="modal-overlay" id="product-crud-modal">
+    <div class="modal-box" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.05rem; font-weight: 800;" id="prod-modal-title">🥑 إضافة منتج جديد للكتالوج</h3>
+        <button class="ctrl-btn" onclick="closeProductModal()">✕</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group">
+          <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 4px; display: block;">اسم المنتج *</label>
+          <input type="text" id="prod-input-name-ar" class="form-input" placeholder="مثال: تفاح أحمر سكري، طماطم بلدي، صدور دجاج">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 4px; display: block;">القسم *</label>
+            <select id="prod-input-category" class="form-input">
+              <option value="fresh">خضار وفواكه طازجة 🥑</option>
+              <option value="meat">لحوم ودواجن طازجة 🥩</option>
+              <option value="dairy">ألبان وأجبان وبيض 🧀</option>
+              <option value="bakery">مخبوزات وفطائر 🥐</option>
+              <option value="canned">معلبات ومحفوظات 🥫</option>
+              <option value="cleaning">منظفات وعناية منزلية 🧼</option>
+              <option value="grains">بقوليات وحبوب وأرز 🌾</option>
+              <option value="spices">بهارات وتوابل ومكسرات 🧂</option>
+              <option value="oils">زيوت وسمن وصلصات 🫒</option>
+              <option value="drinks">مشروبات وعصائر 🧃</option>
+              <option value="snacks">وجبات خفيفة وحلويات 🍫</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 4px; display: block;">وحدة القياس *</label>
+            <input type="text" id="prod-input-unit" class="form-input" placeholder="مثال: 1 كيلو، عبوة 2 لتر">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 4px; display: block;">سعر التكلفة (ر.ي) *</label>
+            <input type="number" id="prod-input-cost" class="form-input" step="0.5" placeholder="4.50" title="لحساب صافي الربح">
+          </div>
+          <div class="form-group">
+            <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 4px; display: block;">سعر البيع (ر.ي) *</label>
+            <input type="number" id="prod-input-sale" class="form-input" step="0.5" placeholder="7.00">
+          </div>
+          <div class="form-group">
+            <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 4px; display: block;">سعر الخصم (اختياري)</label>
+            <input type="number" id="prod-input-discount" class="form-input" step="0.5" placeholder="6.20">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; display: block;">صورة المنتج (من جهازك أو عبر رابط URL)</label>
+          
+          <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
+            <!-- Live Preview Thumbnail -->
+            <div id="prod-image-preview-wrap" style="width: 58px; height: 58px; border-radius: 12px; border: 2px dashed var(--border-subtle); overflow: hidden; background: var(--bg-surface-secondary); flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+              <img id="prod-image-preview-img" src="" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop&q=80'">
+            </div>
+
+            <!-- Upload from device Button & Actions -->
+            <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <input type="file" id="prod-input-file" accept="image/*" style="display: none;" onchange="handleProductImageFile(event)">
+                <button type="button" class="action-btn" onclick="document.getElementById('prod-input-file').click()" style="background: var(--primary-50); color: var(--primary-700); border: 1px solid var(--primary-300); font-size: 0.82rem; padding: 7px 12px; font-weight: 800; cursor: pointer;">
+                  <span>📁 رفع صورة من التخزين المحلي</span>
+                </button>
+                <button type="button" class="ctrl-btn" onclick="clearProductImage()" style="font-size: 0.78rem; padding: 7px 10px; color: var(--danger);" title="إزالة الصورة">
+                  ✕ إزالة
+                </button>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">اختر صورة من جهازك أو اكتب رابط صورة خارجية أدناه</div>
+            </div>
+          </div>
+
+          <!-- URL Input -->
+          <input type="text" id="prod-input-image" class="form-input" placeholder="https://images.unsplash.com/... أو اختر صورة من جهازك أعلاه" oninput="updateProductImagePreview(this.value)">
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-surface-secondary); border-radius: 10px;">
+          <div>
+            <div style="font-weight: 700; font-size: 0.88rem;">حالة التوفر في الكتالوج</div>
+            <div style="font-size: 0.74rem; color: var(--text-muted);">إذا كان غير متوفر يظهر زر الإضافة معطلاً في تطبيق العميل</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="prod-input-available" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="ctrl-btn" onclick="closeProductModal()">إلغاء</button>
+        <button class="action-btn primary" onclick="saveProduct()">حفظ المنتج في الكتالوج 🥑</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD CATEGORY MODAL -->
+  <div class="modal-overlay" id="add-category-modal" onclick="if (event.target === this) closeAddCategoryModal()">
+    <div class="modal-box" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.05rem; font-weight: 800;">➕ إضافة قسم منتجات جديد</h3>
+        <button class="ctrl-btn" onclick="closeAddCategoryModal()">✕</button>
+      </div>
+      <form id="add-category-form" onsubmit="submitNewCategory(event)">
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px; padding: 16px 20px;">
+          <div class="form-group">
+            <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 5px; display: block;">اسم القسم بالعربي *</label>
+            <input type="text" id="new-cat-name-ar" class="form-input" placeholder="مثال: مثلجات، قهوة وشاي، أدوات منزلية" required>
+          </div>
+
+          <div class="form-group">
+            <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 5px; display: block;">رمز أو أيقونة القسم (Emoji) *</label>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="new-cat-icon" class="form-input" style="width: 60px; text-align: center; font-size: 1.3rem; padding: 6px;" value="🏷️" required>
+              <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                <button type="button" class="ctrl-btn" onclick="document.getElementById('new-cat-icon').value='☕'" style="padding: 4px 8px; font-size: 1rem;" title="قهوة">☕</button>
+                <button type="button" class="ctrl-btn" onclick="document.getElementById('new-cat-icon').value='🍦'" style="padding: 4px 8px; font-size: 1rem;" title="مثلجات">🍦</button>
+                <button type="button" class="ctrl-btn" onclick="document.getElementById('new-cat-icon').value='🍗'" style="padding: 4px 8px; font-size: 1rem;" title="دواجن">🍗</button>
+                <button type="button" class="ctrl-btn" onclick="document.getElementById('new-cat-icon').value='🐟'" style="padding: 4px 8px; font-size: 1rem;" title="أسماك">🐟</button>
+                <button type="button" class="ctrl-btn" onclick="document.getElementById('new-cat-icon').value='📦'" style="padding: 4px 8px; font-size: 1rem;" title="طرود">📦</button>
+                <button type="button" class="ctrl-btn" onclick="document.getElementById('new-cat-icon').value='🧴'" style="padding: 4px 8px; font-size: 1rem;" title="عناية">🧴</button>
+                <button type="button" class="ctrl-btn" onclick="document.getElementById('new-cat-icon').value='🍎'" style="padding: 4px 8px; font-size: 1rem;" title="فواكه">🍎</button>
+                <button type="button" class="ctrl-btn" onclick="document.getElementById('new-cat-icon').value='🥑'" style="padding: 4px 8px; font-size: 1rem;" title="أفوكادو">🥑</button>
+                <button type="button" class="ctrl-btn" onclick="document.getElementById('new-cat-icon').value='🥦'" style="padding: 4px 8px; font-size: 1rem;" title="خضار">🥦</button>
+                <button type="button" class="ctrl-btn" onclick="document.getElementById('new-cat-icon').value='🥩'" style="padding: 4px 8px; font-size: 1rem;" title="لحوم">🥩</button>
+                <button type="button" class="ctrl-btn" onclick="document.getElementById('new-cat-icon').value='🧀'" style="padding: 4px 8px; font-size: 1rem;" title="أجبان">🧀</button>
+                <button type="button" class="ctrl-btn" onclick="document.getElementById('new-cat-icon').value='🥐'" style="padding: 4px 8px; font-size: 1rem;" title="مخبوزات">🥐</button>
+                <button type="button" class="ctrl-btn" onclick="document.getElementById('new-cat-icon').value='🍫'" style="padding: 4px 8px; font-size: 1rem;" title="حلويات">🍫</button>
+                <button type="button" class="ctrl-btn" onclick="document.getElementById('new-cat-icon').value='🧃'" style="padding: 4px 8px; font-size: 1rem;" title="عصائر">🧃</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 5px; display: block;">اسم القسم بالإنجليزي (اختياري)</label>
+            <input type="text" id="new-cat-name-en" class="form-input" placeholder="e.g. Ice Cream, Coffee & Tea">
+          </div>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--border-subtle); background: var(--bg-surface-secondary);">
+          <button type="button" class="ctrl-btn" onclick="closeAddCategoryModal()">إلغاء</button>
+          <button type="submit" class="action-btn primary" style="padding: 8px 18px;">
+            <span>حفظ وإضافة القسم ✨</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- WHATSAPP NUMBER MODAL -->
+  <div class="modal-overlay" id="whatsapp-number-modal">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.05rem; font-weight: 800;" id="wa-modal-title">📱 إدارة رقم واتساب</h3>
+        <button class="ctrl-btn" onclick="closeWhatsAppNumberModal()">✕</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group">
+          <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 4px; display: block;">رقم الهاتف (واتساب) *</label>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-weight: 800; font-size: 0.95rem; color: var(--text-muted); direction: ltr;">+</span>
+            <input type="text" id="wa-input-phone" class="form-input" placeholder="مثال: 77XXXXXXX" dir="ltr" style="text-align: left; font-weight: 700;">
+          </div>
+          <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">يمكنك كتابة الرقم المحلي 77XXXXXXX وسيتم إضافة الرمز الدولي تلقائياً</div>
+        </div>
+
+        <div class="form-group">
+          <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 4px; display: block;">تسمية الرقم / اسم الفرع أو الموظف *</label>
+          <input type="text" id="wa-input-label" class="form-input" placeholder="مثال: الفرع الرئيسي - شارع بغداد، أو كول سنتر 2">
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-surface-secondary); border-radius: 10px;">
+          <div>
+            <div style="font-weight: 700; font-size: 0.88rem;">حالة تفعيل الرقم</div>
+            <div style="font-size: 0.74rem; color: var(--text-muted);">إذا كان معطلاً لن يتم توجيه طلبات العملاء إليه</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="wa-input-active" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="ctrl-btn" onclick="closeWhatsAppNumberModal()">إلغاء</button>
+        <button class="action-btn primary" onclick="saveWhatsAppNumber()">حفظ رقم الواتساب 💾</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELIVERY ZONE CRUD MODAL -->
+  <div class="modal-overlay" id="zone-crud-modal">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.05rem; font-weight: 800;" id="zone-modal-title">🚚 إدارة تسعير حي / منطقة التوصيل</h3>
+        <button class="ctrl-btn" onclick="closeZoneModal()">✕</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group">
+          <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 4px; display: block;">اسم المنطقة أو الحي بالعربية *</label>
+          <input type="text" id="zone-input-name-ar" class="form-input" placeholder="مثال: حي الصافية، حي الروضة">
+        </div>
+        <div class="form-group">
+          <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 4px; display: block;">الاسم بالإنجليزية (اختياري)</label>
+          <input type="text" id="zone-input-name-en" class="form-input" placeholder="e.g. Al-Safiyah District">
+        </div>
+        <div class="form-group">
+          <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 4px; display: block;">سعر / رسوم التوصيل (ر.ي) *</label>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="number" id="zone-input-fee" class="form-input" step="0.5" min="0" placeholder="5.00" style="font-weight: 800; font-size: 1rem;">
+            <span style="font-weight: 700; font-size: 0.9rem;">ر.ي</span>
+          </div>
+          <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">يتم تطبيق هذا السعر تلقائياً عند اختيار العميل لهذا الحي في سلة طلبات التطبيق</div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-surface-secondary); border-radius: 10px;">
+          <div>
+            <div style="font-weight: 700; font-size: 0.88rem;">حالة تفعيل المنطقة</div>
+            <div style="font-size: 0.74rem; color: var(--text-muted);">إذا كانت معطلة لن تظهر في قائمة اختيارات التوصيل للعميل</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="zone-input-active" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="ctrl-btn" onclick="closeZoneModal()">إلغاء</button>
+        <button class="action-btn primary" onclick="saveZone()">حفظ تسعير المنطقة 💾</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BANNER CRUD MODAL -->
+  <div class="modal-overlay" id="banner-crud-modal">
+    <div class="modal-box" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.05rem; font-weight: 800;" id="banner-modal-title">🎉 إدارة بنر إعلاني للسلايدر</h3>
+        <button class="ctrl-btn" onclick="closeBannerModal()">✕</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1.6fr; gap: 12px;">
+          <div class="form-group">
+            <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 4px; display: block;">وسم العرض (Badge) *</label>
+            <input type="text" id="banner-input-tag" class="form-input" placeholder="مثال: عرض خاص 🌿، توصيل مجاني ⚡" oninput="refreshModalBannerLivePreview()">
+          </div>
+          <div class="form-group">
+            <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 4px; display: block;">عنوان البنر الرئيسي *</label>
+            <input type="text" id="banner-input-title" class="form-input" placeholder="مثال: خصم 25% على الخضروات العضوية" oninput="refreshModalBannerLivePreview()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 4px; display: block;">الوصف التفصيلي للإعلان *</label>
+          <textarea id="banner-input-desc" class="form-input" rows="2" style="resize: vertical;" placeholder="مثال: طازجة من المزارع المحلية يومياً وتصلك في 20 دقيقة إلى باب منزلك" oninput="refreshModalBannerLivePreview()"></textarea>
+        </div>
+
+        <!-- Interactive Gradient Studio Controller -->
+        <div class="form-group" style="background: var(--bg-surface-secondary); padding: 14px; border-radius: 12px; border: 1px solid var(--border-subtle);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label style="font-weight: 800; font-size: 0.84rem; margin: 0; display: flex; align-items: center; gap: 6px;">
+              <span>🎨</span> <span>مؤشر تدرج لون الخلفية (Interactive Gradient Slider)</span>
+            </label>
+            <span id="banner-grad-angle-val" style="font-size: 0.78rem; color: var(--primary-700); font-weight: 800;"><b>135°</b> (مائل لليمين)</span>
+          </div>
+
+          <!-- Live Gradient Bar Preview -->
+          <div id="banner-grad-bar-preview" style="height: 18px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(0,0,0,0.1); background: linear-gradient(135deg, #059669 0%, #10b981 100%); box-shadow: inset 0 1px 3px rgba(0,0,0,0.15);"></div>
+
+          <!-- Angle Slider: drag left and right -->
+          <div style="margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: var(--text-muted); margin-bottom: 3px;">
+              <span>⬅️ سحب لليسار (0°)</span>
+              <span style="font-weight: 700;">تحريك زاوية التدرج بسلاسة</span>
+              <span>سحب لليمين (360°) ➡️</span>
+            </div>
+            <input type="range" id="banner-grad-angle" min="0" max="360" value="135" style="width: 100%; accent-color: var(--primary-600); cursor: pointer;" oninput="onGradientControlsChange()">
+          </div>
+
+          <!-- Blend / Spread Slider -->
+          <div style="margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: var(--text-muted); margin-bottom: 3px;">
+              <span>تدرج حاد (20%)</span>
+              <span style="font-weight: 700;">نقطة مزج وانتشار الألوان</span>
+              <span>تدرج ناعم ممتد (100%)</span>
+            </div>
+            <input type="range" id="banner-grad-spread" min="20" max="100" value="100" style="width: 100%; accent-color: var(--primary-600); cursor: pointer;" oninput="onGradientControlsChange()">
+          </div>
+
+          <!-- Colors Selection & Preset Chips -->
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="font-size: 0.72rem; font-weight: 700;">اللون 1:</span>
+                <input type="color" id="banner-grad-c1" value="#059669" style="width: 28px; height: 28px; padding: 0; border: none; border-radius: 6px; cursor: pointer;" oninput="onGradientControlsChange()">
+              </div>
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="font-size: 0.72rem; font-weight: 700;">اللون 2:</span>
+                <input type="color" id="banner-grad-c2" value="#10b981" style="width: 28px; height: 28px; padding: 0; border: none; border-radius: 6px; cursor: pointer;" oninput="onGradientControlsChange()">
+              </div>
+            </div>
+
+            <div style="display: gap; gap: 4px; display: flex; flex-wrap: wrap;">
+              <button type="button" class="ctrl-btn" onclick="setGradientPreset('#059669', '#10b981', 135, 100)" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #fff; border: none; font-size: 0.68rem; padding: 3px 8px; border-radius: 6px;">زمردي</button>
+              <button type="button" class="ctrl-btn" onclick="setGradientPreset('#0284c7', '#38bdf8', 135, 100)" style="background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%); color: #fff; border: none; font-size: 0.68rem; padding: 3px 8px; border-radius: 6px;">سماوي</button>
+              <button type="button" class="ctrl-btn" onclick="setGradientPreset('#d97706', '#f59e0b', 135, 100)" style="background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); color: #fff; border: none; font-size: 0.68rem; padding: 3px 8px; border-radius: 6px;">ذهبي</button>
+              <button type="button" class="ctrl-btn" onclick="setGradientPreset('#b91c1c', '#ef4444', 135, 100)" style="background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); color: #fff; border: none; font-size: 0.68rem; padding: 3px 8px; border-radius: 6px;">قرمزي</button>
+              <button type="button" class="ctrl-btn" onclick="setGradientPreset('#4338ca', '#6366f1', 135, 100)" style="background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%); color: #fff; border: none; font-size: 0.68rem; padding: 3px 8px; border-radius: 6px;">نيلي</button>
+              <button type="button" class="ctrl-btn" onclick="setGradientPreset('#0f172a', '#334155', 135, 100)" style="background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: #fff; border: none; font-size: 0.68rem; padding: 3px 8px; border-radius: 6px;">كحلي</button>
+            </div>
+          </div>
+
+          <!-- Hidden input for saving -->
+          <input type="hidden" id="banner-input-gradient" value="linear-gradient(135deg, #059669 0%, #10b981 100%)">
+        </div>
+
+        <!-- Banner Backdrop Image with Local Storage Upload -->
+        <div class="form-group">
+          <label style="font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; display: block;">صورة خلفية البنر (من جهازك أو عبر رابط URL)</label>
+          <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
+            <!-- Preview Thumbnail -->
+            <div id="banner-image-preview-wrap" style="width: 75px; height: 50px; border-radius: 8px; border: 2px dashed var(--border-subtle); overflow: hidden; background: var(--bg-surface-secondary); flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+              <img id="banner-image-preview-img" src="" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop&q=80'">
+            </div>
+
+            <!-- Upload Actions -->
+            <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <input type="file" id="banner-input-file" accept="image/*" style="display: none;" onchange="handleBannerImageFile(event)">
+                <button type="button" class="action-btn" onclick="document.getElementById('banner-input-file').click()" style="background: var(--primary-50); color: var(--primary-700); border: 1px solid var(--primary-300); font-size: 0.82rem; padding: 7px 12px; font-weight: 800; cursor: pointer;">
+                  <span>📁 رفع صورة من التخزين المحلي</span>
+                </button>
+                <button type="button" class="ctrl-btn" onclick="clearBannerImage()" style="font-size: 0.78rem; padding: 7px 10px; color: var(--danger);" title="إزالة الصورة">
+                  ✕ إزالة
+                </button>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">يدعم جميع صيغ الصور ويتم تطبيقها بشفافية متناسقة كخلفية للبنر</div>
+            </div>
+          </div>
+          <input type="text" id="banner-input-image" class="form-input" placeholder="https://images.unsplash.com/... أو اختر صورة من جهازك أعلاه" oninput="updateBannerImagePreview(this.value)">
+        </div>
+
+        <!-- Live Full Banner Preview in Modal (Mobile Screen Mockup) -->
+        <div style="margin-top: 4px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label style="font-weight: 800; font-size: 0.84rem; margin: 0; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+              <span>📱</span> <span>معاينة البنر الحية (كما سيظهر في التطبيق)</span>
+            </label>
+            <span style="font-size: 0.72rem; padding: 2px 10px; border-radius: 20px; background: rgba(16, 185, 129, 0.12); color: var(--primary-700); font-weight: 800; border: 1px solid rgba(16, 185, 129, 0.25);">
+              ⚡ معاينة مباشرة
+            </span>
+          </div>
+
+          <div class="mobile-banner-screen-wrapper">
+            <!-- Mobile Status Bar / Notch -->
+            <div class="mobile-preview-notch-bar">
+              <span>9:41</span>
+              <div class="mobile-preview-notch-pill"></div>
+              <span>5G 📶 100% 🔋</span>
+            </div>
+
+            <!-- Phone Banner Card: 2/3 Image on Left + 1/3 Color on Right -->
+            <div id="modal-banner-preview-box">
+              <!-- 2/3 Image Backdrop on Left -->
+              <img id="modal-banner-preview-bg" class="banner-img-backdrop" src="" alt="معاينة البنر" onerror="this.src='https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=500&auto=format&fit=crop&q=80'">
+
+              <!-- 1/3 Color Area with Tag & Text on Right -->
+              <span id="modal-banner-preview-tag" class="banner-tag">عرض خاص 🌿</span>
+              <div class="banner-info">
+                <h4 id="modal-banner-preview-title">عنوان العرض الإعلاني</h4>
+                <p id="modal-banner-preview-desc">الوصف الإعلاني للعرض</p>
+              </div>
+
+              <!-- Mobile Carousel Indicator Dots -->
+              <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 5; align-items: center;">
+                <div style="width: 16px; height: 4px; border-radius: 10px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>
+                <div style="width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.5);"></div>
+                <div style="width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.5);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Direct Broadcast to In-App Notifications Button -->
+        <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+          <div>
+            <div style="font-weight: 800; font-size: 0.84rem; color: #854d0e;">📢 بث فوري لإشعارات التطبيق</div>
+            <div style="font-size: 0.72rem; color: #a16207;">إرسال رسالة هذا العرض تلقائياً إلى مركز التنبيهات في تطبيق العميل</div>
+          </div>
+          <button type="button" class="action-btn" onclick="broadcastCurrentModalBanner()" style="background: #f59e0b; color: #fff; border: none; font-size: 0.78rem; padding: 6px 12px; font-weight: 800; cursor: pointer; white-space: nowrap;">
+            <span>🔔 بث الآن كإشعار</span>
+          </button>
+        </div>
+
+        <!-- Active toggle -->
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-surface-secondary); border-radius: 10px;">
+          <div>
+            <div style="font-weight: 700; font-size: 0.88rem;">حالة تفعيل البنر بالسلايدر</div>
+            <div style="font-size: 0.74rem; color: var(--text-muted);">إذا كان معطلاً لن يظهر في شريط البنرات المتحركة بالصفحة الرئيسية للتطبيق</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="banner-input-active" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="ctrl-btn" onclick="closeBannerModal()">إلغاء</button>
+        <button class="action-btn primary" onclick="saveBanner()">حفظ البنر الإعلاني 🎉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOOGLE SIGN-IN & VERIFICATION MODAL -->
+  <div class="modal-overlay" id="google-signin-modal">
+    <div class="modal-box" style="max-width: 440px; border-radius: 20px; overflow: hidden; padding: 0;">
+      <div style="background: #ffffff; padding: 28px 24px 20px 24px; text-align: center; border-bottom: 1px solid #f1f5f9;">
+        <!-- Google 4-Color Logo -->
+        <div style="width: 52px; height: 52px; margin: 0 auto 14px auto; background: #fff; border-radius: 50%; box-shadow: 0 4px 14px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center;">
+          <svg viewBox="0 0 24 24" width="28" height="28">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+        </div>
+        <h3 style="margin: 0 0 6px 0; font-size: 1.2rem; font-weight: 800; color: #1e293b;">تسجيل الدخول عبر Google</h3>
+        <p style="margin: 0; font-size: 0.82rem; color: #64748b;">التحقق الأمني من حساب المدير العام للوصول إلى لوحة إدارة تسوق</p>
+      </div>
+
+      <div style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div class="form-group">
+          <label style="font-weight: 700; font-size: 0.8rem; margin-bottom: 4px; display: block;">حساب Google للمدير (المسجل بالقائمة البيضاء) *</label>
+          <input type="email" id="google-email-input" class="form-input" placeholder="name@example.com" value="" dir="ltr" style="text-align: left;">
+        </div>
+
+        <div id="google-modal-auth-error" style="display: none; background: #fef2f2; border: 1.5px solid #fecaca; color: #dc2626; padding: 10px 14px; border-radius: 12px; font-size: 0.82rem; margin-bottom: 12px; text-align: center; font-weight: 800; line-height: 1.4;"></div>
+        <div id="google-auth-status" style="font-size: 0.76rem; color: var(--text-muted); text-align: center; min-height: 20px;"></div>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="ctrl-btn" onclick="closeGoogleSignInModal()" style="flex: 1;">إلغاء</button>
+          <button type="button" class="action-btn primary" onclick="loginWithGoogle(document.getElementById('google-email-input') ? document.getElementById('google-email-input').value : '')" style="flex: 2; padding: 10px 16px; font-weight: 800;">
+            <span>متابعة والتحقق 🔒</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

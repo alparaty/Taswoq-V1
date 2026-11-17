@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل الدخول | نظام تسوق الذكي</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <style>
+    :root {
+      --primary: #059669;
+      --primary-dark: #047857;
+      --primary-light: #10b981;
+      --primary-50: #ecfdf5;
+      --bg-body: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-secondary: #f1f5f9;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-subtle: #e2e8f0;
+      --error-bg: #fef2f2;
+      --error-border: #fecaca;
+      --error-text: #dc2626;
+      --radius-lg: 20px;
+      --radius-md: 12px;
+      --shadow-card: 0 20px 45px -10px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      background-image: radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+                        radial-gradient(at 100% 100%, rgba(30, 64, 175, 0.06) 0px, transparent 50%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px;
+      direction: rtl;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Header */
+    .login-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      padding: 18px 16px 14px 16px;
+      text-align: center;
+      color: #ffffff;
+      position: relative;
+    }
+
+    .brand-logo-wrap {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: #ffffff;
+      margin: 0 auto 8px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+    }
+
+    .brand-logo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .login-header h1 {
+      font-size: 1.22rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 2px;
+    }
+
+    .login-header p {
+      font-size: 0.78rem;
+      opacity: 0.95;
+      font-weight: 600;
+    }
+
+    .login-body {
+      padding: 16px 20px 14px 20px;
+    }
+
+    .role-notice {
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      margin-bottom: 12px;
+      font-size: 0.78rem;
+      line-height: 1.35;
+      background: var(--primary-50);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: var(--primary-dark);
+    }
+
+    .role-notice-title {
+      font-weight: 800;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 9px 36px 9px 12px;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      color: var(--text-main);
+      background: var(--bg-surface);
+      transition: all 0.2s;
+      outline: none;
+      direction: ltr;
+      text-align: right;
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+
+    .input-icon {
+      position: absolute;
+      right: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .toggle-password {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--text-muted);
+      padding: 3px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+      transition: all 0.2s ease;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3);
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(5, 150, 105, 0.4);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .auth-error {
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      color: var(--error-text);
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .login-footer {
+      padding: 10px 16px;
+      text-align: center;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-surface-secondary);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Developer Secret Modal (Night Modern Style) */
+    .dev-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 16px;
+    }
+
+    .dev-modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .dev-modal {
+      width: 100%;
+      max-width: 400px;
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-lg);
+      padding: 26px 24px;
+      color: #f8fafc;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      transform: scale(0.95);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dev-modal-overlay.active .dev-modal {
+      transform: scale(1);
+    }
+
+    .dev-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .dev-modal-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #38bdf8;
+    }
+
+    .dev-modal-close {
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: #94a3b8;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dev-modal-close:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+    }
+
+    .dev-modal-desc {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      line-height: 1.45;
+      margin-bottom: 18px;
+    }
+
+    .dev-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-md);
+      color: #ffffff;
+      font-size: 0.95rem;
+      direction: ltr;
+      text-align: center;
+      font-family: monospace;
+      letter-spacing: 2px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .dev-input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+
+    .dev-submit-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 800;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .dev-submit-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+    }
+
+    .dev-submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .dev-error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <!-- Header -->
+    <div class="login-header">
+      <div class="brand-logo-wrap">
+        <img src="grocery_app_system/interactive_prototype/assets/images/taswoq_logo.png"
+             onerror="this.onerror=null; this.src='taswoq_logo.png';" alt="شعار تسوق">
+      </div>
+      <h1>تسوق | Taswoq</h1>
+      <p>نظام إدارة العمليات والمبيعات الذكي</p>
+    </div>
+
+    <!-- Unified Login Body -->
+    <div class="login-body">
+      <div class="role-notice">
+        <div class="role-notice-title">
+          <span>🛡️</span> <span>بوابة تسجيل الدخول الموحدة</span>
+        </div>
+        <div>أدخل اسم المستخدم وكلمة المرور للمدير أو الموظف، وسيقوم النظام بتوجيهك تلقائياً وفق صلاحياتك.</div>
+      </div>
+
+      <div id="login-error" class="auth-error" role="alert"></div>
+
+      <form id="form-login" onsubmit="handleUnifiedSubmit(event)">
+        <div class="form-group">
+          <label class="form-label" for="login-username">اسم المستخدم *</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input type="text" id="login-username" class="form-input" autocomplete="username"
+                   placeholder="اسم المستخدم" required autofocus>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="login-password">كلمة المرور *</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="login-password" class="form-input" autocomplete="current-password"
+                   placeholder="كلمة المرور" required>
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('login-password', this)"
+                    title="إظهار/إخفاء كلمة المرور">👁️</button>
+          </div>
+        </div>
+
+        <button type="submit" id="login-submit-btn" class="submit-btn">
+          <span>تسجيل الدخول 🚀</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      <span>نظام تسوق المركزي v3.0</span>
+    </div>
+  </div>
+
+  <!-- Developer Secret Modal -->
+  <div id="dev-secret-modal" class="dev-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="dev-modal-title">
+    <div class="dev-modal">
+      <div class="dev-modal-header">
+        <div id="dev-modal-title" class="dev-modal-title">
+          <span>⚡</span> <span>بوابة التطوير والصيانة السرية</span>
+        </div>
+        <button type="button" class="dev-modal-close" onclick="closeDevModal()" aria-label="إغلاق">✕</button>
+      </div>
+      <div class="dev-modal-desc">
+        هذا المدخل مخصص لعمليات الصيانة البرمجية والتشخيصية عبر اتصال HTTPS الموثوق، ويتطلب الرمز السري المعتمد في بيئة الخادم.
+      </div>
+      <div id="dev-error" class="dev-error" role="alert"></div>
+      <form id="form-dev-login" onsubmit="handleDevSubmit(event)">
+        <input type="password" id="dev-secret-key" class="dev-input" placeholder="••••••••••••••••" autocomplete="off" required>
+        <button type="submit" id="dev-submit-btn" class="dev-submit-btn">تحقق والمصادقة كـ مطور 🔑</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+      }
+    }
+
+    function openDevModal() {
+      const m = document.getElementById('dev-secret-modal');
+      if (m) {
+        if (m.classList.contains('active')) {
+          return; // فتح النافذة مرة واحدة فقط إذا كانت مفتوحة بالفعل
+        }
+        m.classList.add('active');
+        m.style.display = 'flex';
+        const inp = document.getElementById('dev-secret-key');
+        if (inp) {
+          inp.value = '';
+          setTimeout(() => inp.focus(), 80);
+        }
+        const err = document.getElementById('dev-error');
+        if (err) err.style.display = 'none';
+      }
+    }
+
+    function closeDevModal() {
+      const m = document.getElementById('dev-secret-modal');
+      if (m) {
+        m.classList.remove('active');
+        m.style.display = 'none';
+      }
+    }
+
+    // دعم اختصار لوحة تحكم المطور Ctrl + Shift + D (يعمل فقط بتخطيط لوحة المفاتيح الإنجليزية)
+    function handleDevShortcut(e) {
+      if (e.repeat) return;
+      // التحقق من مفتاح D/d الإنجليزي حصراً عبر e.key (دون استخدام e.code أو المحارف العربية)
+      const isEnglishKeyD = (e.key === 'D' || e.key === 'd');
+      const isDevCombo = (e.ctrlKey || e.metaKey) && e.shiftKey && isEnglishKeyD;
+      if (isDevCombo) {
+        if (e.preventDefault) e.preventDefault();
+        if (e.stopPropagation) e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        openDevModal();
+        return false;
+      }
+      if (e.key === 'Escape' || e.keyCode === 27) {
+        closeDevModal();
+      }
+    }
+
+    window.addEventListener('keydown', handleDevShortcut, true);
+    window.openDevModal = openDevModal;
+    window.openDevSecretModal = openDevModal;
+
+    // معالجة تسجيل الدخول الموحد (اسم المستخدم + كلمة المرور فقط)
+    async function handleUnifiedSubmit(event) {
+      event.preventDefault();
+      const uInp = document.getElementById('login-username');
+      const pInp = document.getElementById('login-password');
+      const errBox = document.getElementById('login-error');
+      const btn = document.getElementById('login-submit-btn');
+
+      errBox.style.display = 'none';
+      errBox.textContent = '';
+
+      const username = uInp.value.trim();
+      const password = pInp.value.trim();
+      if (!username || !password) {
+        errBox.textContent = 'يرجى إدخال اسم المستخدم وكلمة المرور';
+        errBox.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>جاري التحقق والمصادقة... ⏳</span>';
+
+      try {
+        const apiEndpoint = '/api/auth/login';
+        const res = await fetch(apiEndpoint, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (res.ok && data && data.success) {
+          if (data.csrfToken) {
+            sessionStorage.setItem('taswoq_csrf_token', data.csrfToken);
+          }
+          if (data.user) {
+            try { localStorage.setItem('taswoq_active_user', JSON.stringify(data.user)); } catch (e) {}
+          }
+          const target = (data.redirect && data.redirect.startsWith('/')) ? data.redirect : '/admin.html';
+          window.location.replace(target);
+        } else {
+          errBox.textContent = (data && data.error) || 'فشل تسجيل الدخول. يرجى التأكد من صحة البيانات.';
+          errBox.style.display = 'block';
+          btn.disabled = false;
+          btn.innerHTML = '<span>تسجيل الدخول 🚀</span>';
+        }
+      } catch (err) {
+        errBox.textContent = 'تعذر الاتصال بالخادم. يرجى المحاولة لاحقاً: ' + err.message;
+        errBox.style.display = 'block';
+        btn.disabled = false;
+        btn.innerHTML = '<span>تسجيل الدخول 🚀</span>';
+      }
+    }
+
+    // معالجة تسجيل دخول المطور السري
+    async function handleDevSubmit(event) {
+      event.preventDefault();
+      const sInp = document.getElementById('dev-secret-key');
+      const errBox = document.getElementById('dev-error');
+      const btn = document.getElementById('dev-submit-btn');
+
+      errBox.style.display = 'none';
+      errBox.textContent = '';
+
+      const secret = sInp.value.trim();
+      if (!secret) {
+        errBox.textContent = 'يرجى إدخال رمز المطور السري';
+        errBox.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'جاري التحقق من الرمز... ⏳';
+
+      try {
+        const apiEndpoint = '/api/auth/developer/login';
+        const res = await fetch(apiEndpoint, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ secretKey: secret })
+        });
+        const data = await res.json();
+
+        if (res.ok && data && data.success) {
+          if (data.csrfToken) {
+            sessionStorage.setItem('taswoq_csrf_token', data.csrfToken);
+          }
+          if (data.user) {
+            try { localStorage.setItem('taswoq_active_user', JSON.stringify(data.user)); } catch (e) {}
+          }
+          window.location.replace('/admin.html');
+        } else {
+          errBox.textContent = (data && data.error) || 'رمز المطور السري غير صحيح أو الحساب معطل.';
+          errBox.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'تحقق والمصادقة كـ مطور 🔑';
+        }
+      } catch (err) {
+        errBox.textContent = 'تعذر الاتصال بالخادم: ' + err.message;
+        errBox.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'تحقق والمصادقة كـ مطور 🔑';
+      }
+    }
+  </script>
+</body>
+</html>
