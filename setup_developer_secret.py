@@ -67,11 +67,17 @@ def atomic_write_secret_env(target_path: str, secret_hash: str) -> None:
         # استبدال ذري
         os.replace(tmp_path, target_path)
 
-        if hasattr(os, "chmod"):
+        if hasattr(os, "chown") and hasattr(os, "chmod"):
             try:
-                os.chmod(target_path, 0o600)
+                import grp
+                taswoq_gid = grp.getgrnam("taswoq").gr_gid
+                os.chown(target_path, 0, taswoq_gid)
+                os.chmod(target_path, 0o640)
             except Exception:
-                pass
+                try:
+                    os.chmod(target_path, 0o600)
+                except Exception:
+                    pass
     finally:
         if os.path.isfile(tmp_path):
             try:

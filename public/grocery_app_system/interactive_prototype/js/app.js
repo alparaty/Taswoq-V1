@@ -240,6 +240,15 @@ try {
 } catch (e) { }
 
 // Global Persistence Helpers for Taswoq Web
+function getStoreLogoUrl() {
+  if (typeof state !== 'undefined' && state.appLogo) return state.appLogo;
+  try {
+    const s = localStorage.getItem('taswoq_app_logo') || localStorage.getItem('tasweeq_app_logo');
+    if (s) return s;
+  } catch (e) {}
+  return '/assets/images/taswoq_logo.png';
+}
+window.getStoreLogoUrl = getStoreLogoUrl;
 function persistProducts() {
   if (window.TaswoqSync && typeof window.TaswoqSync.syncUp === "function") { window.TaswoqSync.syncUp({ products: state.products }); }
   try {
@@ -281,7 +290,9 @@ function persistComplaints() {
 window.persistComplaints = persistComplaints;
 
 function persistBanners() {
-  if (window.TaswoqSync && typeof window.TaswoqSync.syncUp === "function") { window.TaswoqSync.syncUp({ banners: state.banners }); }
+  if (window.TaswoqSync && typeof window.TaswoqSync.syncUp === "function") {
+    window.TaswoqSync.syncUp({ banners: state.banners }).catch(() => {});
+  }
   try {
     localStorage.setItem('tasweeq_banners', JSON.stringify(state.banners));
   } catch (e) {
@@ -290,7 +301,9 @@ function persistBanners() {
 }
 
 function persistWhatsAppRecipients() {
-  if (window.TaswoqSync && typeof window.TaswoqSync.syncUp === "function") { window.TaswoqSync.syncUp({ whatsappRecipients: state.whatsappRecipients }); }
+  if (window.TaswoqSync && typeof window.TaswoqSync.syncUp === "function") {
+    window.TaswoqSync.syncUp({ whatsappRecipients: state.whatsappRecipients }).catch(() => {});
+  }
   try {
     const data = JSON.stringify(state.whatsappRecipients);
     localStorage.setItem('tasweeq_whatsapp_recipients', data);
@@ -305,7 +318,7 @@ function persistDelivery() {
     window.TaswoqSync.syncUp({
       deliverySettings: state.deliverySettings,
       deliveryZones: state.deliveryZones
-    });
+    }).catch(() => {});
   }
   try {
     localStorage.setItem('tasweeq_delivery_zones', JSON.stringify(state.deliveryZones));
@@ -3789,15 +3802,27 @@ function renderAdminProducts() {
   }).join('');
 }
 
-function toggleProductStock(pId) {
-  sfx.playTap();
+async function toggleProductStock(pId) {
+  if (typeof sfx !== 'undefined' && sfx.playTap) sfx.playTap();
   const prod = state.products.find(p => p.id === pId);
   if (prod) {
+    const oldAvailability = prod.isAvailable;
     prod.isAvailable = !prod.isAvailable;
     persistProducts();
     renderProducts();
     renderAdminProducts();
-    showToast(`تم تعديل توفر: ${prod.nameAr}`);
+    showToast(`تم تعديل توفر: ${prod.nameAr} (${prod.isAvailable ? 'متوفر' : 'غير متوفر'})`);
+
+    if (window.TaswoqSync && typeof window.TaswoqSync.updateProductQuick === 'function') {
+      const res = await window.TaswoqSync.updateProductQuick(prod.id, { isAvailable: prod.isAvailable });
+      if (!res || res.success === false) {
+        prod.isAvailable = oldAvailability;
+        persistProducts();
+        renderProducts();
+        renderAdminProducts();
+        if (typeof showToast === 'function') showToast(`❌ فشل حفظ توفر المنتج في الخادم`);
+      }
+    }
   }
 }
 
@@ -4058,6 +4083,15 @@ function renderAdminComplaints() {
   }
 
   tbody.innerHTML = displayedComplaints.map(c => {
+    const ticketNo = c.ticketNo || c.ticket_no || c.complaintNumber || (c.id ? ('TKT-' + String(c.id).padStart(4, '0')) : 'TKT-0000');
+    const customerName = c.customerName || c.customer_name || 'عميل تسوق';
+    const customerPhone = c.customerPhone || c.customer_phone || '';
+    const orderId = c.orderId || c.order_id;
+    const typeNameAr = c.typeNameAr || c.type_name_ar || c.type || 'شكوى عامة';
+    const adminReply = c.adminReply || c.admin_reply || c.reply || '';
+    const createdAt = c.createdAt || c.created_at || '';
+    const compMsg = c.message || c.desc || '';
+
     let statusBadge = '';
     if (c.status === 'Resolved') {
       statusBadge = `<span class="status-pill status-completed" style="font-size: 0.72rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;"><span>✅</span> <span>تم الحل</span></span>`;
@@ -4076,21 +4110,21 @@ function renderAdminComplaints() {
     };
     const icon = typeIcons[c.type] || '🎫';
 
-    const orderBadge = c.orderId
-      ? `<span class="brand-badge" style="font-size: 0.74rem; background: #ede9fe; color: #6d28d9; font-weight: 800;">#${c.orderId}</span>`
+    const orderBadge = orderId
+      ? `<span class="brand-badge" style="font-size: 0.74rem; background: #ede9fe; color: #6d28d9; font-weight: 800;">#${orderId}</span>`
       : `<span style="color: var(--text-muted); font-size: 0.75rem;">-</span>`;
 
-    const replyContent = c.adminReply
+    const replyContent = adminReply
       ? `
         <div style="display: flex; flex-direction: column; gap: 4px;">
-          <div style="font-size: 0.74rem; color: #047857; background: #ecfdf5; padding: 5px 8px; border-radius: 6px; border-inline-start: 3px solid #10b981; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${c.adminReply}">
-            💬 ${c.adminReply}
+          <div style="font-size: 0.74rem; color: #047857; background: #ecfdf5; padding: 5px 8px; border-radius: 6px; border-inline-start: 3px solid #10b981; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${adminReply}">
+            💬 ${adminReply}
           </div>
           <div style="display: flex; gap: 4px; align-items: center;">
-            <button type="button" class="ctrl-btn" onclick="openAdminReplyModal('${c.ticketNo}')" style="font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; align-self: flex-start; cursor: pointer;" title="تعديل الرد وتحديث الحالة">
+            <button type="button" class="ctrl-btn" onclick="openAdminReplyModal('${ticketNo}')" style="font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; font-weight: 700; align-self: flex-start; cursor: pointer;" title="تعديل الرد وتحديث الحالة">
               ✏️ تعديل الرد
             </button>
-            <button type="button" class="ctrl-btn" onclick="deleteAdminComplaint('${c.ticketNo}')" style="color: #ef4444; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px;" title="حذف الشكوى نهائياً">
+            <button type="button" class="ctrl-btn" onclick="deleteAdminComplaint('${ticketNo}')" style="color: #ef4444; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px;" title="حذف الشكوى نهائياً">
               🗑️
             </button>
           </div>
@@ -4098,10 +4132,10 @@ function renderAdminComplaints() {
       `
       : `
         <div style="display: flex; gap: 6px; align-items: center;">
-          <button type="button" class="action-btn primary" onclick="openAdminReplyModal('${c.ticketNo}')" style="font-size: 0.76rem; padding: 6px 14px; border-radius: 8px; font-weight: 800; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25); cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+          <button type="button" class="action-btn primary" onclick="openAdminReplyModal('${ticketNo}')" style="font-size: 0.76rem; padding: 6px 14px; border-radius: 8px; font-weight: 800; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25); cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
             <span>💬</span> <span>الرد على الشكوى</span>
           </button>
-          <button type="button" class="ctrl-btn" onclick="deleteAdminComplaint('${c.ticketNo}')" style="color: #ef4444; font-size: 0.75rem; padding: 6px 10px; border-radius: 8px;" title="حذف الشكوى نهائياً">
+          <button type="button" class="ctrl-btn" onclick="deleteAdminComplaint('${ticketNo}')" style="color: #ef4444; font-size: 0.75rem; padding: 6px 10px; border-radius: 8px;" title="حذف الشكوى نهائياً">
             🗑️
           </button>
         </div>
@@ -4110,22 +4144,22 @@ function renderAdminComplaints() {
     return `
       <tr>
         <td>
-          <div style="font-weight: 800; color: var(--primary-700); font-family: monospace; font-size: 0.88rem;">${c.ticketNo}</div>
-          <div style="font-size: 0.68rem; color: var(--text-muted);">${c.createdAt || ''}</div>
+          <div style="font-weight: 800; color: var(--primary-700); font-family: monospace; font-size: 0.88rem;">${ticketNo}</div>
+          <div style="font-size: 0.68rem; color: var(--text-muted);">${createdAt}</div>
         </td>
         <td>
-          <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-main);">${c.customerName || 'عميل تسوق'}</div>
-          <div style="font-size: 0.72rem; color: var(--text-muted); direction: ltr; text-align: right;">${c.customerPhone || ''}</div>
+          <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-main);">${customerName}</div>
+          <div style="font-size: 0.72rem; color: var(--text-muted); direction: ltr; text-align: right;">${customerPhone}</div>
         </td>
         <td>
           <span style="font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
-            <span>${icon}</span> <span>${c.typeNameAr || c.type || 'شكوى عامة'}</span>
+            <span>${icon}</span> <span>${typeNameAr}</span>
           </span>
         </td>
         <td>${orderBadge}</td>
-        <td style="max-width: 240px; font-size: 0.78rem; line-height: 1.4; color: var(--text-main);" title="${c.message || ''}">
+        <td style="max-width: 240px; font-size: 0.78rem; line-height: 1.4; color: var(--text-main);" title="${compMsg}">
           <div style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-            ${c.message || ''}
+            ${compMsg}
           </div>
         </td>
         <td>${statusBadge}</td>
@@ -4138,7 +4172,12 @@ function renderAdminComplaints() {
 // Open Dedicated Admin Complaint Reply Modal
 function openAdminReplyModal(ticketNo) {
   if (typeof sfx !== 'undefined' && sfx.playTap) sfx.playTap();
-  const complaint = (state.complaints || []).find(c => c.ticketNo === ticketNo);
+  const complaint = (state.complaints || []).find(c =>
+    (c.ticketNo && c.ticketNo === ticketNo) ||
+    (c.ticket_no && c.ticket_no === ticketNo) ||
+    (c.complaintNumber && c.complaintNumber === ticketNo) ||
+    String(c.id) === String(ticketNo)
+  );
   if (!complaint) {
     console.error('Complaint not found for ticket:', ticketNo);
     return;
@@ -4161,10 +4200,15 @@ function openAdminReplyModal(ticketNo) {
   const dateEl = document.getElementById('reply-modal-date');
   const textarea = document.getElementById('reply-modal-text');
 
-  if (ticketInput) ticketInput.value = complaint.ticketNo;
-  if (ticketBadge) ticketBadge.textContent = complaint.ticketNo;
-  if (custName) custName.textContent = complaint.customerName || 'عميل تسوق';
-  if (custPhone) custPhone.textContent = complaint.customerPhone || '';
+  const resTicket = complaint.ticketNo || complaint.ticket_no || complaint.complaintNumber || ticketNo;
+  const resCustName = complaint.customerName || complaint.customer_name || 'عميل تسوق';
+  const resCustPhone = complaint.customerPhone || complaint.customer_phone || '';
+  const resAdminReply = complaint.adminReply || complaint.admin_reply || complaint.reply || '';
+
+  if (ticketInput) ticketInput.value = resTicket;
+  if (ticketBadge) ticketBadge.textContent = resTicket;
+  if (custName) custName.textContent = resCustName;
+  if (custPhone) custPhone.textContent = resCustPhone;
 
   if (waLink) {
     const rawPhone = (complaint.customerPhone || '').replace(/\D/g, '');
@@ -4200,7 +4244,7 @@ function openAdminReplyModal(ticketNo) {
 
   // Reply Text
   if (textarea) {
-    textarea.value = complaint.adminReply || '';
+    textarea.value = resAdminReply;
     updateReplyCharCount();
   }
 
@@ -4214,12 +4258,22 @@ function openAdminReplyModal(ticketNo) {
 
 async function deleteAdminComplaint(ticketNo) {
   if (typeof sfx !== 'undefined' && sfx.playTap) sfx.playTap();
-  const complaint = (state.complaints || []).find(c => c.ticketNo === ticketNo || String(c.id) === String(ticketNo));
+  const complaint = (state.complaints || []).find(c =>
+    (c.ticketNo && c.ticketNo === ticketNo) ||
+    (c.ticket_no && c.ticket_no === ticketNo) ||
+    (c.complaintNumber && c.complaintNumber === ticketNo) ||
+    String(c.id) === String(ticketNo)
+  );
   if (!complaint) return;
 
-  if (confirm(`هل أنت متأكد من حذف الشكوى رقم (${ticketNo}) للعميل (${complaint.customerName}) نهائياً؟ هذا الإجراء لا يمكن التراجع عنه.`)) {
-    const compId = complaint.id || ticketNo;
-    state.complaints = (state.complaints || []).filter(c => c.ticketNo !== ticketNo && String(c.id) !== String(ticketNo));
+  const resTicket = complaint.ticketNo || complaint.ticket_no || complaint.complaintNumber || ticketNo;
+  const resName = complaint.customerName || complaint.customer_name || 'عميل تسوق';
+
+  if (confirm(`هل أنت متأكد من حذف الشكوى رقم (${resTicket}) للعميل (${resName}) نهائياً؟ هذا الإجراء لا يمكن التراجع عنه.`)) {
+    const compId = complaint.id || resTicket;
+    state.complaints = (state.complaints || []).filter(c =>
+      c.ticketNo !== ticketNo && c.ticket_no !== ticketNo && String(c.id) !== String(ticketNo) && c.ticketNo !== resTicket
+    );
     persistComplaints();
 
     if (typeof addAuditLog === 'function') {
@@ -4338,7 +4392,12 @@ async function submitAdminComplaintReply() {
     return;
   }
 
-  const complaint = (state.complaints || []).find(c => c.ticketNo === ticketNo || String(c.id) === String(ticketNo));
+  const complaint = (state.complaints || []).find(c =>
+    (c.ticketNo && c.ticketNo === ticketNo) ||
+    (c.ticket_no && c.ticket_no === ticketNo) ||
+    (c.complaintNumber && c.complaintNumber === ticketNo) ||
+    String(c.id) === String(ticketNo)
+  );
   if (!complaint) return;
 
   const repliedBy = state.currentUser ? (state.currentUser.fullName || state.currentUser.name || state.currentUser.username) : 'إدارة تسوق';
@@ -6278,8 +6337,9 @@ function saveStoreGeneralSettings(isConfirmed = false) {
       supportSettings: state.supportSettings,
       whatsappRecipients: state.whatsappRecipients,
       approvedDelegateId: state.approvedDelegateId,
-      storeProfile: storeProfile
-    });
+      storeProfile: storeProfile,
+      appNameAr: storeName
+    }).catch(e => console.warn('Store settings sync error:', e));
   }
 
   if (typeof sfx !== 'undefined' && sfx.playSuccess) sfx.playSuccess();
@@ -7577,6 +7637,22 @@ function renderAdminUsers() {
     return;
   }
 
+  if ((!state.users || state.users.length === 0) && !window._fetchingUsersInFlight) {
+    window._fetchingUsersInFlight = true;
+    const fetchPromise = (window.TaswoqSync && typeof window.TaswoqSync.fetchUsers === 'function')
+      ? window.TaswoqSync.fetchUsers()
+      : fetch('/api/users', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(d => d && d.users);
+
+    Promise.resolve(fetchPromise).then(usersList => {
+      window._fetchingUsersInFlight = false;
+      if (Array.isArray(usersList) && usersList.length > 0) {
+        state.users = usersList;
+        try { localStorage.setItem('khudair_users', JSON.stringify(usersList)); } catch (e) {}
+        renderAdminUsers();
+      }
+    }).catch(() => { window._fetchingUsersInFlight = false; });
+  }
+
   const users = state.users || [];
   const q = (state.userSearchQuery || '').toLowerCase();
   const filter = state.userRoleFilter || 'all';
@@ -7604,8 +7680,8 @@ function renderAdminUsers() {
       (u.email || '').toLowerCase().includes(q);
     if (!matchQ) return false;
 
-    if (filter === 'admin') return u.role === 'admin';
-    if (filter === 'employee') return u.role === 'employee';
+    if (filter === 'admin') return u.role === 'admin' || u.role === 'primary_admin';
+    if (filter === 'employee') return u.role === 'employee' || u.role === 'staff';
     if (filter === 'active') return u.isActive;
     if (filter === 'disabled') return !u.isActive;
     return true;
@@ -8621,7 +8697,14 @@ function openDevSecretModal() {
   const pwdInput = document.getElementById('dev-secret-password-input');
   const errEl = document.getElementById('dev-secret-error-msg');
 
-  if (errEl) errEl.style.display = 'none';
+  if (errEl) {
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+      errEl.textContent = '⚠️ تنبيه أمني: أنت تتصل عبر بروتوكول HTTP غير مشفر. تسجيل دخول المطور يتطلب اتصال HTTPS آمن حصراً.';
+      errEl.style.display = 'block';
+    } else {
+      errEl.style.display = 'none';
+    }
+  }
   if (phasePwd) phasePwd.style.display = 'block';
   if (phaseActions) phaseActions.style.display = 'none';
   if (pwdInput) {
@@ -9496,7 +9579,7 @@ function applySyncedData(data) {
   if (!data) return;
 
   // Sync users list from server
-  if (Array.isArray(data.users) && data.users.length > 0) {
+  if (Array.isArray(data.users)) {
     state.users = data.users;
     try { localStorage.setItem('khudair_users', JSON.stringify(data.users)); } catch (e) { }
     if (typeof renderAdminUsers === 'function') renderAdminUsers();
@@ -9506,6 +9589,13 @@ function applySyncedData(data) {
     try { localStorage.setItem('khudair_admin_whitelist', JSON.stringify(data.adminWhitelist)); } catch (e) { }
   }
 
+  if (data.appNameAr) {
+    state.appNameAr = data.appNameAr;
+  }
+  if (data.appLogo) {
+    state.appLogo = data.appLogo;
+    try { localStorage.setItem('taswoq_app_logo', data.appLogo); } catch (e) {}
+  }
 
   if (Array.isArray(data.products) && data.products.length > 0) {
     state.products = data.products;
@@ -9525,10 +9615,21 @@ function applySyncedData(data) {
     try { localStorage.setItem('tasweeq_banners', JSON.stringify(data.banners)); } catch (e) { }
   }
 
-  if (Array.isArray(data.whatsappRecipients) && data.whatsappRecipients.length > 0) {
+  if (Array.isArray(data.whatsappRecipients)) {
     state.whatsappRecipients = data.whatsappRecipients;
     if (window.GROCERY_DATA) window.GROCERY_DATA.whatsappRecipients = data.whatsappRecipients;
     try { localStorage.setItem('tasweeq_whatsapp_recipients', JSON.stringify(data.whatsappRecipients)); } catch (e) { }
+    if (typeof renderAdminWhatsApp === 'function') renderAdminWhatsApp();
+  }
+
+  if (data.supportSettings && typeof data.supportSettings === 'object') {
+    state.supportSettings = { ...state.supportSettings, ...data.supportSettings };
+    try { localStorage.setItem('tasweeq_support_settings', JSON.stringify(state.supportSettings)); } catch (e) {}
+  }
+
+  if (data.storeProfile && typeof data.storeProfile === 'object') {
+    state.storeProfile = { ...state.storeProfile, ...data.storeProfile };
+    try { localStorage.setItem('tasweeq_store_profile', JSON.stringify(state.storeProfile)); } catch (e) {}
   }
 
   if (data.deliverySettings && typeof data.deliverySettings === 'object') {

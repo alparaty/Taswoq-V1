@@ -142,11 +142,33 @@ def record_dev_login_success(client_ip: str):
 def get_developer_secret_hash():
     """
     استرجاع تجزئة رمز المطور السري (المملحة بـ scrypt) حصراً من إعداد سرّي للخادم:
-    متغير البيئة DEVELOPER_SECRET_HASH.
+    متغير البيئة DEVELOPER_SECRET_HASH أو ملف الأسرار المحمي /etc/taswoq/secrets.env أو .env.
     عند غياب التجزئة، تُعطل بوابة المطوّر فقط (برمز 503) مع استمرار عمل المتجر وباقي خدمات النظام.
     دون طباعة الرمز أو التجزئة.
     """
-    return os.environ.get("DEVELOPER_SECRET_HASH", "").strip()
+    val = os.environ.get("DEVELOPER_SECRET_HASH", "").strip()
+    if val:
+        return val.strip('"\'')
+
+    # قراءة احتياطية آمنة من ملفات الأسرار المحمية على الخادم إذا لم يُحمّل في متغيرات البيئة مباشرة
+    candidates = [
+        "/etc/taswoq/secrets.env",
+        os.path.join(BASE_DIR, ".env"),
+        "/var/www/taswoq/.env"
+    ]
+    for c in candidates:
+        try:
+            if os.path.isfile(c):
+                with open(c, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line.startswith("DEVELOPER_SECRET_HASH="):
+                            raw = line.split("=", 1)[1].strip()
+                            if raw:
+                                return raw.strip('"\'')
+        except Exception:
+            pass
+    return ""
 
 _pool      = None
 _pool_lock = threading.Lock()
@@ -224,8 +246,10 @@ def is_transport_secure(handler):
     if normalized_ip in TRUSTED_PROXIES:
         headers = getattr(handler, "headers", {})
         proto = headers.get("X-Forwarded-Proto", "").strip().lower()
-        if proto == "https":
-            return True
+        if proto:
+            proto_list = [p.strip() for p in proto.split(",")]
+            if proto_list[0] == "https" or proto == "https":
+                return True
     return False
 
 
@@ -543,6 +567,15 @@ def db_get_setting(cur, key, default=None):
     row = cur.fetchone()
     return row[0] if row else default
 
+def db_set_setting(cur, key, val):
+    cur.execute(
+        """
+        INSERT INTO settings (key, value) VALUES (%s, %s)
+        ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+        """,
+        (str(key), str(val) if val is not None else "")
+    )
+
 def db_get_system_generation(cur):
     try:
         return max(1, int(db_get_setting(cur, "system_generation", "1") or 1))
@@ -717,11 +750,135 @@ def db_get_orders_admin(cur):
         result.append(d_out)
     return result
 
+def db_get_whatsapp_recipients(cur):
+    cur.execute("SELECT id, name, phone, is_active, is_approved, extra_data FROM whatsapp_recipients ORDER BY id ASC;")
+    rows = cur.fetchall()
+    result = []
+    for r in rows:
+        item = {
+            "id": r[0],
+            "name": r[1] or "",
+            "label": r[1] or "",
+            "phone": r[2] or "",
+            "isActive": bool(r[3]),
+            "isApproved": bool(r[4]),
+            "lastUsedAt": "لم يُستخدم بعد"
+        }
+        if r[5]:
+            try:
+                extra = r[5] if isinstance(r[5], dict) else json.loads(r[5])
+                item.update(extra)
+            except Exception:
+                pass
+        result.append(item)
+    return result
+
+def db_get_support_settings(cur):
+    cur.execute("SELECT * FROM support_settings LIMIT 1;")
+    row = cur.fetchone()
+    if not row:
+        return {
+            "whatsapp": "967736645512",
+            "email": "support@taswoq.com",
+            "workingHoursAr": "8:00 ص - 11:00 م",
+            "workingHoursEn": "8:00 AM - 11:00 PM"
+        }
+    cols = [c[0] for c in cur.description]
+    d = dict(zip(cols, row))
+    return {
+        "whatsapp": d.get("whatsapp") or "967736645512",
+        "email": d.get("email") or "support@taswoq.com",
+        "workingHoursAr": d.get("working_hours_ar") or "8:00 ص - 11:00 م",
+        "workingHoursEn": d.get("working_hours_en") or "8:00 AM - 11:00 PM"
+    }
+
+def db_get_store_profile(cur):
+    cur.execute("SELECT * FROM store_profile LIMIT 1;")
+    row = cur.fetchone()
+    if not row:
+        return {
+            "name": db_get_setting(cur, "appNameAr", "تسوق"),
+            "phone": "967736645512",
+            "address": "صنعاء - اليمن",
+            "hours": "8:00 ص - 11:00 م",
+            "email": "support@taswoq.com",
+            "deliveryTime": "30-45 دقيقة",
+            "minFreeDelivery": 15000.0,
+            "currency": "YER"
+        }
+    cols = [c[0] for c in cur.description]
+    d = dict(zip(cols, row))
+    return {
+        "name": d.get("name") or db_get_setting(cur, "appNameAr", "تسوق"),
+        "phone": d.get("phone") or "",
+        "address": d.get("address") or "",
+        "hours": d.get("hours") or "",
+        "email": d.get("email") or "",
+        "deliveryTime": d.get("delivery_time") or "",
+        "minFreeDelivery": float(d.get("min_free_delivery") or 0),
+        "currency": d.get("currency") or "YER",
+        "updatedAt": d.get("updated_at") or ""
+    }
+
+def db_get_users(cur):
+    cur.execute("""
+        SELECT id, username, full_name, email, role, is_active, permissions,
+               is_primary_admin, must_change_password, created_at, last_login_at
+        FROM users
+        ORDER BY is_primary_admin DESC, id ASC;
+    """)
+    users = []
+    for r in cur.fetchall():
+        users.append({
+            "id": r[0],
+            "username": r[1],
+            "fullName": r[2] or r[1],
+            "name": r[2] or r[1],
+            "email": r[3] or "",
+            "role": r[4] or "staff",
+            "isActive": bool(r[5]),
+            "permissions": r[6] if isinstance(r[6], dict) else {},
+            "isPrimaryAdmin": bool(r[7]),
+            "mustChangePassword": bool(r[8]),
+            "createdAt": r[9] or "",
+            "lastLoginAt": r[10] or ""
+        })
+    return users
+
 def db_get_complaints_admin(cur):
-    cur.execute("SELECT * FROM complaints ORDER BY id DESC")
+    cur.execute("SELECT * FROM complaints ORDER BY id DESC;")
     rows = cur.fetchall()
     cols = [c[0] for c in cur.description]
-    return [dict(zip(cols, r)) for r in rows]
+    result = []
+    for r in rows:
+        d = dict(zip(cols, r))
+        ticket_no = d.get("ticket_no") or f"TKT-{d.get('id', 0):04d}"
+        cust_name = d.get("customer_name") or "عميل تسوق"
+        cust_phone = d.get("customer_phone") or ""
+        result.append({
+            "id": d.get("id"),
+            "ticketNo": ticket_no,
+            "ticket_no": ticket_no,
+            "complaintNumber": ticket_no,
+            "deviceId": d.get("device_id") or "",
+            "orderId": d.get("order_id"),
+            "customerName": cust_name,
+            "customer_name": cust_name,
+            "customerPhone": cust_phone,
+            "customer_phone": cust_phone,
+            "type": d.get("type") or "general",
+            "typeNameAr": d.get("type_name_ar") or "شكوى عامة",
+            "subject": d.get("subject") or "",
+            "message": d.get("message") or "",
+            "status": d.get("status") or "New",
+            "statusAr": d.get("status_ar") or "جديدة",
+            "adminReply": d.get("admin_reply") or "",
+            "reply": d.get("admin_reply") or "",
+            "repliedAt": d.get("replied_at") or "",
+            "repliedBy": d.get("replied_by") or "",
+            "createdAt": d.get("created_at") or ""
+        })
+    return result
 
 def db_get_order_by_token(cur, order_id, raw_token):
     """الاستعلام الآمن عن طلب الزبون بمقارنة ثابتة الزمن hmac.compare_digest."""
@@ -1174,6 +1331,9 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                                 "paymentMethod": r[6], "recordedBy": r[7]
                             })
 
+                    can_view_users = bool(is_full_admin or user_perms.get("users") or user_perms.get("users:read") or user_perms.get("users:write"))
+                    users_data = db_get_users(cur) if can_view_users else []
+
                     self._send_json(200, {
                         "success": True,
                         "backend": "postgresql",
@@ -1184,6 +1344,8 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                         "ordersAuthoritative": bool(is_full_admin or user_perms.get("orders:read") or user_perms.get("orders:write")),
                         "appNameAr": db_get_setting(cur, "appNameAr", "تسوق"),
                         "appNameEn": db_get_setting(cur, "appNameEn", "Taswoq"),
+                        "appLogo": db_get_setting(cur, "appLogoBase64", "") or "/assets/images/taswoq_logo.png",
+                        "appLogoBase64": db_get_setting(cur, "appLogoBase64", ""),
                         "categories": db_get_categories(cur),
                         "products": db_get_products(cur, public_only=False),
                         "banners": db_get_banners(cur),
@@ -1192,7 +1354,11 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                         "complaints": complaints_data,
                         "deliverySettings": db_get_delivery_settings(cur),
                         "deliveryZones": db_get_delivery_zones(cur),
+                        "whatsappRecipients": db_get_whatsapp_recipients(cur),
+                        "supportSettings": db_get_support_settings(cur),
+                        "storeProfile": db_get_store_profile(cur),
                         "paymentWallets": db_get_payment_wallets(cur),
+                        "users": users_data,
                         "systemGeneration": db_get_system_generation(cur),
                         "lastUpdated": db_get_last_updated(cur)
                     })
@@ -1203,6 +1369,7 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                         "success": True,
                         "appNameAr": db_get_setting(cur, "appNameAr", "تسوق"),
                         "appNameEn": db_get_setting(cur, "appNameEn", "Taswoq"),
+                        "appLogo": db_get_setting(cur, "appLogoBase64", "") or "/assets/images/taswoq_logo.png",
                         "appLogoBase64": db_get_setting(cur, "appLogoBase64", ""),
                         "categories": db_get_categories(cur),
                         "products": db_get_products(cur, public_only=True),
@@ -1210,6 +1377,9 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                         "deliverySettings": db_get_delivery_settings(cur),
                         "deliveryZones": db_get_delivery_zones(cur),
                         "paymentWallets": db_get_payment_wallets(cur),
+                        "supportSettings": db_get_support_settings(cur),
+                        "storeProfile": db_get_store_profile(cur),
+                        "whatsappRecipients": [r for r in db_get_whatsapp_recipients(cur) if r.get("isActive")],
                         "orders": [],
                         "users": [],
                         "complaints": [],
@@ -1282,7 +1452,7 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                     target_clause = "('all', 'broadcast', 'admin')" if is_full_admin else "('all', 'broadcast')"
                     cur.execute(
                         f"""
-                        SELECT id, type, title, title_ar, body, body_ar, message, target, timestamp
+                        SELECT id, type, title, title_ar, body, body_ar, message, target, COALESCE(logo, '/assets/images/taswoq_logo.png') as logo, timestamp
                         FROM notifications
                         WHERE target IN {target_clause}
                         ORDER BY timestamp DESC LIMIT 20;
@@ -1303,7 +1473,7 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                     # قصر الإشعارات العامة على الأنواع العامة المعتمدة فقط وحظر أي إشعارات إدارية أو طلبات
                     cur.execute(
                         """
-                        SELECT id, type, title, title_ar, body, body_ar, message, target, timestamp
+                        SELECT id, type, title, title_ar, body, body_ar, message, target, COALESCE(logo, '/assets/images/taswoq_logo.png') as logo, timestamp
                         FROM notifications
                         WHERE target IN ('all', 'broadcast', 'general', 'promo', 'customers')
                           AND type IN ('promo', 'announcement', 'general', 'store_update')
@@ -1364,6 +1534,47 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                     "total": len(wallets),
                     "lastUpdated": db_get_last_updated(cur)
                 })
+            finally:
+                put_conn(conn)
+            return
+
+        # 6b. مناطق وإعدادات التوصيل REST API
+        if path == "/api/delivery-zones":
+            conn = get_conn()
+            try:
+                cur = conn.cursor()
+                zones = db_get_delivery_zones(cur)
+                self._send_json(200, {"success": True, "deliveryZones": zones})
+            finally:
+                put_conn(conn)
+            return
+
+        if path == "/api/delivery-settings":
+            conn = get_conn()
+            try:
+                cur = conn.cursor()
+                settings = db_get_delivery_settings(cur)
+                self._send_json(200, {"success": True, "deliverySettings": settings})
+            finally:
+                put_conn(conn)
+            return
+
+        if path == "/api/whatsapp-recipients":
+            conn = get_conn()
+            try:
+                cur = conn.cursor()
+                recipients = db_get_whatsapp_recipients(cur)
+                self._send_json(200, {"success": True, "whatsappRecipients": recipients})
+            finally:
+                put_conn(conn)
+            return
+
+        if path == "/api/store-profile":
+            conn = get_conn()
+            try:
+                cur = conn.cursor()
+                profile = db_get_store_profile(cur)
+                self._send_json(200, {"success": True, "storeProfile": profile})
             finally:
                 put_conn(conn)
             return
@@ -1471,7 +1682,7 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                 cur = conn.cursor()
                 cur.execute(
                     """
-                    SELECT id, type, title, title_ar, body, body_ar, message, target, timestamp, is_read
+                    SELECT id, type, title, title_ar, body, body_ar, message, target, COALESCE(logo, '/assets/images/taswoq_logo.png') as logo, timestamp, is_read
                     FROM notifications
                     WHERE timestamp >= %s
                     ORDER BY timestamp DESC LIMIT 50;
@@ -1637,7 +1848,11 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
         if path == "/api/auth/developer/login":
             # اشتراط HTTPS الموثوق
             if not is_transport_secure(self):
-                self._send_json(403, {"success": False, "error": "تسجيل دخول المطور يتطلب اتصال HTTPS موثوق حصراً"})
+                self._send_json(403, {
+                    "success": False,
+                    "error": "تسجيل دخول المطور يتطلب اتصال HTTPS موثوق حصراً. يرجى فتح الموقع عبر رابط HTTPS الآمن (https://)",
+                    "code": "HTTPS_REQUIRED"
+                })
                 return
 
             client_ip = (
@@ -1662,7 +1877,11 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
             submitted_secret = str(body["secretKey"]).strip()
             dev_hash = get_developer_secret_hash()
             if not dev_hash:
-                self._send_json(503, {"success": False, "error": "بوابة المطوّر غير مهيأة على هذا الخادم (DEVELOPER_SECRET_HASH غير مضبوط)"})
+                self._send_json(503, {
+                    "success": False,
+                    "error": "بوابة المطوّر غير مهيأة على هذا الخادم (DEVELOPER_SECRET_HASH غير مضبوط في البيئة أو في /etc/taswoq/secrets.env)",
+                    "code": "DEV_GATE_NOT_CONFIGURED"
+                })
                 return
 
             # التحقق عبر scrypt
@@ -2233,26 +2452,101 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                 return
             banners_list = body.get("banners")
             if not isinstance(banners_list, list):
-                # قد يكون بانراً مفرداً
                 banners_list = [body]
             conn = get_conn()
             try:
                 cur = conn.cursor()
                 for b in banners_list:
-                    bid = str(b.get("id") or f"ban_{now_ms()}")
+                    bid = safe_int(b.get("id"))
+                    if not bid:
+                        cur.execute("SELECT COALESCE(MAX(id), 0) + 1 FROM banners;")
+                        bid = cur.fetchone()[0]
                     cur.execute(
                         """
-                        INSERT INTO banners (id, title, img, action, link, is_active)
-                        VALUES (%s, %s, %s, %s, %s, %s)
+                        INSERT INTO banners (id, tag_ar, tag_en, title_ar, title_en, desc_ar, desc_en, bg_gradient, image, is_active)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                         ON CONFLICT (id) DO UPDATE SET
-                            title=EXCLUDED.title, img=EXCLUDED.img, action=EXCLUDED.action,
-                            link=EXCLUDED.link, is_active=EXCLUDED.is_active;
+                            tag_ar=EXCLUDED.tag_ar, tag_en=EXCLUDED.tag_en,
+                            title_ar=EXCLUDED.title_ar, title_en=EXCLUDED.title_en,
+                            desc_ar=EXCLUDED.desc_ar, desc_en=EXCLUDED.desc_en,
+                            bg_gradient=EXCLUDED.bg_gradient, image=EXCLUDED.image,
+                            is_active=EXCLUDED.is_active;
                         """,
-                        (bid, b.get("title",""), b.get("img",""), b.get("action",""), b.get("link",""), bool(b.get("isActive", True)))
+                        (
+                            bid,
+                            b.get("tagAr") or b.get("tag_ar") or "",
+                            b.get("tagEn") or b.get("tag_en") or "",
+                            b.get("titleAr") or b.get("title_ar") or b.get("title") or "",
+                            b.get("titleEn") or b.get("title_en") or b.get("title") or "",
+                            b.get("descAr") or b.get("desc_ar") or b.get("desc") or "",
+                            b.get("descEn") or b.get("desc_en") or b.get("desc") or "",
+                            b.get("bgGradient") or b.get("bg_gradient") or "linear-gradient(135deg, #059669 0%, #10b981 100%)",
+                            b.get("image") or b.get("img") or "",
+                            bool(b.get("isActive", True))
+                        )
                     )
                 ts = db_set_last_updated(cur)
                 conn.commit()
                 self._send_json(200, {"success": True, "lastUpdated": ts})
+            except Exception as e:
+                conn.rollback()
+                self._send_json(500, {"success": False, "error": str(e)})
+            finally:
+                put_conn(conn)
+            return
+
+        # POST /api/delivery-settings
+        if path == "/api/delivery-settings":
+            if not check_admin_permission(admin_user, "delivery:write") and not admin_user.get("isPrimaryAdmin") and admin_user.get("role") != "developer_admin":
+                self._send_json(403, {"success": False, "error": "ليس لديك صلاحية تعديل إعدادات التوصيل"})
+                return
+            conn = get_conn()
+            try:
+                cur = conn.cursor()
+                cur.execute(
+                    """
+                    UPDATE delivery_settings SET
+                        base_fee = %s, free_delivery_enabled = %s, is_enabled = %s, free_above = %s
+                    WHERE id = 1;
+                    """,
+                    (safe_float(body.get("baseFee", 0)), bool(body.get("freeDeliveryEnabled", False)),
+                     bool(body.get("isEnabled", True)), safe_float(body.get("freeAbove")))
+                )
+                ts = db_set_last_updated(cur)
+                conn.commit()
+                self._send_json(200, {"success": True, "lastUpdated": ts})
+            except Exception as e:
+                conn.rollback()
+                self._send_json(500, {"success": False, "error": str(e)})
+            finally:
+                put_conn(conn)
+            return
+
+        # POST /api/delivery-zones
+        if path == "/api/delivery-zones":
+            if not check_admin_permission(admin_user, "delivery:write") and not admin_user.get("isPrimaryAdmin") and admin_user.get("role") != "developer_admin":
+                self._send_json(403, {"success": False, "error": "ليس لديك صلاحية تعديل مناطق التوصيل"})
+                return
+            zid = safe_int(body.get("id"))
+            conn = get_conn()
+            try:
+                cur = conn.cursor()
+                if not zid:
+                    cur.execute("SELECT COALESCE(MAX(id), 0) + 1 FROM delivery_zones;")
+                    zid = cur.fetchone()[0]
+                cur.execute(
+                    """
+                    INSERT INTO delivery_zones (id, name_ar, name_en, fee, is_active, estimated_time)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        name_ar=EXCLUDED.name_ar, name_en=EXCLUDED.name_en,
+                        fee=EXCLUDED.fee, is_active=EXCLUDED.is_active, estimated_time=EXCLUDED.estimated_time;
+                    """,
+                    (zid, body.get("nameAr",""), body.get("nameEn",""), safe_float(body.get("fee",0)), bool(body.get("isActive",True)), body.get("estimatedTime",""))
+                )
+                ts = db_set_last_updated(cur)
+                conn.commit()
+                self._send_json(200, {"success": True, "zoneId": zid, "lastUpdated": ts})
             except Exception as e:
                 conn.rollback()
                 self._send_json(500, {"success": False, "error": str(e)})
@@ -2326,16 +2620,17 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
             target = str(body.get("target", "all")).strip()
             ts = now_ms()
 
+            logo_url = str(body.get("logo") or "/assets/images/taswoq_logo.png").strip()
             conn = get_conn()
             try:
                 cur = conn.cursor()
                 cur.execute(
                     """
-                    INSERT INTO notifications (id, type, title, title_ar, body, body_ar, message, target, timestamp, is_read)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, FALSE)
+                    INSERT INTO notifications (id, type, title, title_ar, body, body_ar, message, target, logo, timestamp, is_read)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, FALSE)
                     RETURNING id;
                     """,
-                    (notif_id, notif_type, title, title, message, message, message, target, ts)
+                    (notif_id, notif_type, title, title, message, message, message, target, logo_url, ts)
                 )
                 conn.commit()
                 self._send_json(201, {
@@ -2580,7 +2875,7 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
 
         # POST /api/sync (المزامنة الذرية الصارمة مع فحص RBAC لكل حقل وحظر الطلبات والمستخدمين)
         if path == "/api/sync":
-            allowed_sync_fields = {"products", "categories", "banners", "deliverySettings", "deliveryZones", "supportSettings", "whatsappRecipients"}
+            allowed_sync_fields = {"products", "categories", "banners", "deliverySettings", "deliveryZones", "supportSettings", "whatsappRecipients", "storeProfile", "appNameAr", "appNameEn", "appLogo"}
             # فحص الحقول الواردة
             for field in body.keys():
                 if field == "orders":
@@ -2637,28 +2932,42 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                                 (cid, c.get("nameAr",""), c.get("nameEn",""), c.get("icon",""), c.get("img",""), bool(c.get("isSpecial",False)))
                             )
 
-                # 3. البانرات
-                if "banners" in body:
+                # 3. البانرات (باستخدام أسماء الأعمدة المتوافقة مع مخطط DB الحقيقي)
+                if "banners" in body and isinstance(body["banners"], list):
                     if not check_admin_permission(admin_user, "banners:write"):
                         conn.rollback()
                         self._send_json(403, {"success": False, "error": "ليس لديك صلاحية تعديل البانرات"})
                         return
                     for b in body["banners"]:
-                        bid = str(b.get("id"))
+                        bid = safe_int(b.get("id"))
                         if bid:
                             cur.execute(
                                 """
-                                INSERT INTO banners (id, title, img, action, link, is_active)
-                                VALUES (%s, %s, %s, %s, %s, %s)
+                                INSERT INTO banners (id, tag_ar, tag_en, title_ar, title_en, desc_ar, desc_en, bg_gradient, image, is_active)
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                                 ON CONFLICT (id) DO UPDATE SET
-                                    title=EXCLUDED.title, img=EXCLUDED.img, action=EXCLUDED.action,
-                                    link=EXCLUDED.link, is_active=EXCLUDED.is_active;
+                                    tag_ar=EXCLUDED.tag_ar, tag_en=EXCLUDED.tag_en,
+                                    title_ar=EXCLUDED.title_ar, title_en=EXCLUDED.title_en,
+                                    desc_ar=EXCLUDED.desc_ar, desc_en=EXCLUDED.desc_en,
+                                    bg_gradient=EXCLUDED.bg_gradient, image=EXCLUDED.image,
+                                    is_active=EXCLUDED.is_active;
                                 """,
-                                (bid, b.get("title",""), b.get("img",""), b.get("action",""), b.get("link",""), bool(b.get("isActive",True)))
+                                (
+                                    bid,
+                                    b.get("tagAr") or b.get("tag_ar") or "",
+                                    b.get("tagEn") or b.get("tag_en") or "",
+                                    b.get("titleAr") or b.get("title_ar") or b.get("title") or "",
+                                    b.get("titleEn") or b.get("title_en") or b.get("title") or "",
+                                    b.get("descAr") or b.get("desc_ar") or b.get("desc") or "",
+                                    b.get("descEn") or b.get("desc_en") or b.get("desc") or "",
+                                    b.get("bgGradient") or b.get("bg_gradient") or "linear-gradient(135deg, #059669 0%, #10b981 100%)",
+                                    b.get("image") or b.get("img") or "",
+                                    bool(b.get("isActive", True))
+                                )
                             )
 
                 # 4. إعدادات التوصيل والإعدادات الحساسة: محصورة بالمخولين
-                sensitive_fields = {"deliverySettings", "deliveryZones", "supportSettings", "whatsappRecipients"}
+                sensitive_fields = {"deliverySettings", "deliveryZones", "supportSettings", "whatsappRecipients", "storeProfile", "appNameAr", "appNameEn", "appLogo"}
                 present_sensitive = sensitive_fields.intersection(body.keys())
                 if present_sensitive:
                     can_manage_settings = (
@@ -2673,7 +2982,7 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                         self._send_json(403, {"success": False, "error": "تعديل إعدادات التوصيل والمتجر محصور بالمخولين"})
                         return
 
-                    if "deliverySettings" in body:
+                    if "deliverySettings" in body and isinstance(body["deliverySettings"], dict):
                         ds = body["deliverySettings"]
                         cur.execute(
                             """
@@ -2685,7 +2994,7 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                              bool(ds.get("isEnabled", True)), safe_float(ds.get("freeAbove")))
                         )
 
-                    if "deliveryZones" in body:
+                    if "deliveryZones" in body and isinstance(body["deliveryZones"], list):
                         for z in body["deliveryZones"]:
                             zid = safe_int(z.get("id"))
                             if zid:
@@ -2699,6 +3008,87 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                                     """,
                                     (zid, z.get("nameAr",""), z.get("nameEn",""), safe_float(z.get("fee",0)), bool(z.get("isActive",True)), z.get("estimatedTime",""))
                                 )
+
+                    if "whatsappRecipients" in body and isinstance(body["whatsappRecipients"], list):
+                        cur.execute("DELETE FROM whatsapp_recipients;")
+                        for r in body["whatsappRecipients"]:
+                            rid = safe_int(r.get("id"))
+                            if rid:
+                                cur.execute(
+                                    """
+                                    INSERT INTO whatsapp_recipients (id, name, phone, is_active, is_approved, extra_data)
+                                    VALUES (%s, %s, %s, %s, %s, %s)
+                                    ON CONFLICT (id) DO UPDATE SET
+                                        name=EXCLUDED.name, phone=EXCLUDED.phone,
+                                        is_active=EXCLUDED.is_active, is_approved=EXCLUDED.is_approved, extra_data=EXCLUDED.extra_data;
+                                    """,
+                                    (
+                                        rid,
+                                        r.get("label") or r.get("name") or "",
+                                        r.get("phone", ""),
+                                        bool(r.get("isActive", True)),
+                                        bool(r.get("isApproved", False)),
+                                        json.dumps({"label": r.get("label", ""), "lastUsedAt": r.get("lastUsedAt", "")}, ensure_ascii=False)
+                                    )
+                                )
+
+                    if "supportSettings" in body and isinstance(body["supportSettings"], dict):
+                        ss = body["supportSettings"]
+                        cur.execute("SELECT id FROM support_settings LIMIT 1;")
+                        srow = cur.fetchone()
+                        if srow:
+                            cur.execute(
+                                """
+                                UPDATE support_settings
+                                SET whatsapp = %s, email = %s, working_hours_ar = %s, working_hours_en = %s
+                                WHERE id = %s;
+                                """,
+                                (ss.get("whatsapp",""), ss.get("email",""), ss.get("workingHoursAr",""), ss.get("workingHoursEn",""), srow[0])
+                            )
+                        else:
+                            cur.execute(
+                                """
+                                INSERT INTO support_settings (whatsapp, email, working_hours_ar, working_hours_en)
+                                VALUES (%s, %s, %s, %s);
+                                """,
+                                (ss.get("whatsapp",""), ss.get("email",""), ss.get("workingHoursAr",""), ss.get("workingHoursEn",""))
+                            )
+
+                    if "storeProfile" in body and isinstance(body["storeProfile"], dict):
+                        sp = body["storeProfile"]
+                        if sp.get("name"):
+                            db_set_setting(cur, "appNameAr", sp.get("name"))
+                        cur.execute("SELECT id FROM store_profile LIMIT 1;")
+                        sprow = cur.fetchone()
+                        if sprow:
+                            cur.execute(
+                                """
+                                UPDATE store_profile
+                                SET name = %s, phone = %s, address = %s, hours = %s, email = %s,
+                                    delivery_time = %s, min_free_delivery = %s, currency = %s, updated_at = %s
+                                WHERE id = %s;
+                                """,
+                                (sp.get("name",""), sp.get("phone",""), sp.get("address",""), sp.get("hours",""), sp.get("email",""),
+                                 sp.get("deliveryTime",""), safe_float(sp.get("minFreeDelivery", 0)), sp.get("currency", "YER"),
+                                 time.strftime("%Y-%m-%d %H:%M:%S"), sprow[0])
+                            )
+                        else:
+                            cur.execute(
+                                """
+                                INSERT INTO store_profile (name, phone, address, hours, email, delivery_time, min_free_delivery, currency, updated_at)
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+                                """,
+                                (sp.get("name",""), sp.get("phone",""), sp.get("address",""), sp.get("hours",""), sp.get("email",""),
+                                 sp.get("deliveryTime",""), safe_float(sp.get("minFreeDelivery", 0)), sp.get("currency", "YER"),
+                                 time.strftime("%Y-%m-%d %H:%M:%S"))
+                            )
+
+                    if "appNameAr" in body and body["appNameAr"]:
+                        db_set_setting(cur, "appNameAr", str(body["appNameAr"]).strip())
+                    if "appNameEn" in body and body["appNameEn"]:
+                        db_set_setting(cur, "appNameEn", str(body["appNameEn"]).strip())
+                    if "appLogo" in body and body["appLogo"]:
+                        db_set_setting(cur, "appLogoBase64", str(body["appLogo"]).strip())
 
                 ts = db_set_last_updated(cur)
                 conn.commit()
@@ -2882,25 +3272,74 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                 put_conn(conn)
             return
 
+        # PUT /api/delivery-zones/{id}
+        if path.startswith("/api/delivery-zones/"):
+            if not check_admin_permission(admin_user, "delivery:write") and not admin_user.get("isPrimaryAdmin") and admin_user.get("role") != "developer_admin":
+                self._send_json(403, {"success": False, "error": "ليس لديك صلاحية تعديل مناطق التوصيل"})
+                return
+            try:
+                zid = int(path.split("/")[-1])
+            except (ValueError, TypeError):
+                self._send_json(400, {"success": False, "error": "معرف منطقة التوصيل غير صالح"})
+                return
+            conn = get_conn()
+            try:
+                cur = conn.cursor()
+                cur.execute(
+                    """
+                    UPDATE delivery_zones
+                    SET name_ar = COALESCE(%s, name_ar),
+                        name_en = COALESCE(%s, name_en),
+                        fee = COALESCE(%s, fee),
+                        is_active = COALESCE(%s, is_active),
+                        estimated_time = COALESCE(%s, estimated_time)
+                    WHERE id = %s;
+                    """,
+                    (body.get("nameAr"), body.get("nameEn"), safe_float(body.get("fee")) if "fee" in body else None,
+                     bool(body.get("isActive")) if "isActive" in body else None, body.get("estimatedTime"), zid)
+                )
+                ts = db_set_last_updated(cur)
+                conn.commit()
+                self._send_json(200, {"success": True, "zoneId": zid, "lastUpdated": ts})
+            except Exception as e:
+                conn.rollback()
+                self._send_json(500, {"success": False, "error": str(e)})
+            finally:
+                put_conn(conn)
+            return
+
         # PUT /api/complaints/{id}
         if path.startswith("/api/complaints/"):
             if not check_admin_permission(admin_user, "complaints:write"):
                 self._send_json(403, {"success": False, "error": "ليس لديك صلاحية الرد على الشكاوى"})
                 return
-            try:
-                comp_id = int(path.split("/")[-1])
-            except:
-                self._send_json(400, {"success": False, "error": "معرف الشكوى غير صالح"})
+            target_key = path.split("/")[-1].strip()
+            if not target_key:
+                self._send_json(400, {"success": False, "error": "معرف الشكوى مطلوب"})
                 return
             conn = get_conn()
             try:
                 cur = conn.cursor()
+                # Resolve numeric ID or ticket_no
+                if target_key.isdigit():
+                    cur.execute("SELECT id FROM complaints WHERE id = %s;", (int(target_key),))
+                else:
+                    cur.execute("SELECT id FROM complaints WHERE ticket_no = %s OR id::text = %s;", (target_key, target_key))
+                comp_row = cur.fetchone()
+                if not comp_row:
+                    conn.rollback()
+                    self._send_json(404, {"success": False, "error": "الشكوى غير موجودة"})
+                    return
+                comp_id = comp_row[0]
+
                 status_map = {
-                    "new": "جديدة", "in_progress": "قيد المعالجة", "resolved": "تم الحل", "closed": "مغلقة", "rejected": "مرفوضة"
+                    "new": "جديدة", "in_progress": "قيد المعالجة", "resolved": "تم الحل", "closed": "مغلقة", "rejected": "مرفوضة",
+                    "New": "جديدة", "InProgress": "قيد المعالجة", "Resolved": "تم الحل", "Closed": "مغلقة", "Rejected": "مرفوضة"
                 }
-                new_status = body.get("status", "in_progress")
-                new_status_ar = status_map.get(new_status, "قيد المعالجة")
-                admin_reply = body.get("adminReply", "")
+                new_status = body.get("status", "InProgress")
+                new_status_ar = body.get("statusAr") or status_map.get(new_status, "قيد المعالجة")
+                admin_reply = body.get("adminReply") or body.get("reply") or ""
+
                 cur.execute(
                     """
                     UPDATE complaints
@@ -2911,7 +3350,7 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
                 )
                 ts = db_set_last_updated(cur)
                 conn.commit()
-                self._send_json(200, {"success": True, "complaintId": comp_id, "status": new_status, "lastUpdated": ts})
+                self._send_json(200, {"success": True, "complaintId": comp_id, "status": new_status, "statusAr": new_status_ar, "lastUpdated": ts})
             except Exception as e:
                 conn.rollback()
                 self._send_json(500, {"success": False, "error": str(e)})
@@ -3176,22 +3615,75 @@ class TaswoqSyncHandler(SimpleHTTPRequestHandler):
 
 
 
-        if path.startswith("/api/complaints/"):
-            if not check_admin_permission(admin_user, "complaints:write"):
-                self._send_json(403, {"success": False, "error": "ليس لديك صلاحية حذف الشكاوى"})
+        if path.startswith("/api/delivery-zones/"):
+            if not check_admin_permission(admin_user, "delivery:write") and not admin_user.get("isPrimaryAdmin") and admin_user.get("role") != "developer_admin":
+                self._send_json(403, {"success": False, "error": "ليس لديك صلاحية حذف مناطق التوصيل"})
                 return
             try:
-                comp_id = int(path.split("/")[-1])
-            except:
-                self._send_json(400, {"success": False, "error": "معرف الشكوى غير صالح"})
+                zid = int(path.split("/")[-1])
+            except (ValueError, TypeError):
+                self._send_json(400, {"success": False, "error": "معرف منطقة التوصيل غير صالح"})
                 return
             conn = get_conn()
             try:
                 cur = conn.cursor()
-                cur.execute("DELETE FROM complaints WHERE id = %s", (comp_id,))
+                cur.execute("DELETE FROM delivery_zones WHERE id = %s;", (zid,))
                 ts = db_set_last_updated(cur)
                 conn.commit()
-                self._send_json(200, {"success": True, "deletedId": comp_id, "lastUpdated": ts})
+                self._send_json(200, {"success": True, "deletedId": zid, "lastUpdated": ts})
+            except Exception as e:
+                conn.rollback()
+                self._send_json(500, {"success": False, "error": str(e)})
+            finally:
+                put_conn(conn)
+            return
+
+        if path.startswith("/api/banners/"):
+            if not check_admin_permission(admin_user, "banners:write"):
+                self._send_json(403, {"success": False, "error": "ليس لديك صلاحية حذف البانرات"})
+                return
+            try:
+                bid = int(path.split("/")[-1])
+            except (ValueError, TypeError):
+                self._send_json(400, {"success": False, "error": "معرف البنر غير صالح"})
+                return
+            conn = get_conn()
+            try:
+                cur = conn.cursor()
+                cur.execute("DELETE FROM banners WHERE id = %s;", (bid,))
+                ts = db_set_last_updated(cur)
+                conn.commit()
+                self._send_json(200, {"success": True, "deletedId": bid, "lastUpdated": ts})
+            except Exception as e:
+                conn.rollback()
+                self._send_json(500, {"success": False, "error": str(e)})
+            finally:
+                put_conn(conn)
+            return
+
+        if path.startswith("/api/complaints/"):
+            if not check_admin_permission(admin_user, "complaints:write"):
+                self._send_json(403, {"success": False, "error": "ليس لديك صلاحية حذف الشكاوى"})
+                return
+            target_key = path.split("/")[-1].strip()
+            if not target_key:
+                self._send_json(400, {"success": False, "error": "معرف الشكوى مطلوب"})
+                return
+            conn = get_conn()
+            try:
+                cur = conn.cursor()
+                if target_key.isdigit():
+                    cur.execute("DELETE FROM complaints WHERE id = %s RETURNING id;", (int(target_key),))
+                else:
+                    cur.execute("DELETE FROM complaints WHERE ticket_no = %s OR id::text = %s RETURNING id;", (target_key, target_key))
+                deleted_row = cur.fetchone()
+                if not deleted_row:
+                    conn.rollback()
+                    self._send_json(404, {"success": False, "error": "الشكوى غير موجودة"})
+                    return
+                ts = db_set_last_updated(cur)
+                conn.commit()
+                self._send_json(200, {"success": True, "deletedId": deleted_row[0], "lastUpdated": ts})
             except Exception as e:
                 conn.rollback()
                 self._send_json(500, {"success": False, "error": str(e)})

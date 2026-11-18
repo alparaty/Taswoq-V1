@@ -485,6 +485,7 @@
       try {
         const res = await fetch(`${this._serverUrl}/api/complaints/${encodeURIComponent(complaintId)}`, {
           method: 'PUT',
+          credentials: 'same-origin',
           headers: this.getAuthHeaders(),
           body: JSON.stringify(updates)
         });
@@ -503,6 +504,7 @@
       try {
         const res = await fetch(`${this._serverUrl}/api/complaints/${encodeURIComponent(complaintId)}`, {
           method: 'DELETE',
+          credentials: 'same-origin',
           headers: this.getAuthHeaders()
         });
         if (res.ok) {
@@ -712,10 +714,15 @@
      */
     sendNotification: async function (notifData) {
       try {
+        const payload = { ...notifData };
+        if (!payload.logo) {
+          payload.logo = '/assets/images/taswoq_logo.png';
+        }
         const res = await fetch(`${this._serverUrl}/api/notifications`, {
           method: 'POST',
+          credentials: 'same-origin',
           headers: this.getAuthHeaders(),
-          body: JSON.stringify(notifData)
+          body: JSON.stringify(payload)
         });
         if (res.ok) {
           const result = await res.json();
@@ -724,6 +731,25 @@
         }
       } catch (err) {
         console.warn('[TaswoqSync] sendNotification offline:', err.message);
+      }
+      return null;
+    },
+
+    /**
+     * Fetch all users/staff from PostgreSQL
+     */
+    fetchUsers: async function () {
+      try {
+        const res = await fetch(`${this._serverUrl}/api/users`, {
+          credentials: 'same-origin',
+          headers: this.getAuthHeaders()
+        });
+        const data = await res.json().catch(() => null);
+        if (res.ok && data && data.success && Array.isArray(data.users)) {
+          return data.users;
+        }
+      } catch (err) {
+        console.warn('[TaswoqSync] fetchUsers offline/failed:', err.message);
       }
       return null;
     },
