@@ -14473,19 +14473,17 @@ const state = window.state = {
   cart: {}, // { productId: qty }
 
   favorites: (function() {
-
     try {
-
+      if (localStorage.getItem('taswoq_favs_seeded') === 'true' && !localStorage.getItem('taswoq_user_favs_customized')) {
+        localStorage.removeItem('taswoq_favs_seeded');
+        localStorage.removeItem('taswoq_favorites');
+        return {};
+      }
       const stored = localStorage.getItem('taswoq_favorites');
-
-      return stored ? JSON.parse(stored) : { 1: true, 3: true };
-
+      return stored ? JSON.parse(stored) : {};
     } catch (e) {
-
-      return { 1: true, 3: true };
-
+      return {};
     }
-
   })(),
 
   selectedZoneId: null, // Default null: prompt customer to select zone
@@ -16133,18 +16131,6 @@ function renderFavoritesSection() {
 
   state.favorites = state.favorites || {};
 
-  if (Object.keys(state.favorites).length === 0 && !localStorage.getItem('taswoq_favs_seeded')) {
-
-    state.favorites[1] = true;
-
-    state.favorites[3] = true;
-
-    localStorage.setItem('taswoq_favs_seeded', 'true');
-
-    localStorage.setItem('taswoq_favorites', JSON.stringify(state.favorites));
-
-  }
-
 
 
   const favIds = Object.keys(state.favorites).filter(id => Boolean(state.favorites[id])).map(id => parseInt(id, 10));
@@ -16250,18 +16236,6 @@ function renderFavoritesScreen() {
 
 
   state.favorites = state.favorites || {};
-
-  if (Object.keys(state.favorites).length === 0 && !localStorage.getItem('taswoq_favs_seeded')) {
-
-    state.favorites[1] = true;
-
-    state.favorites[3] = true;
-
-    localStorage.setItem('taswoq_favs_seeded', 'true');
-
-    localStorage.setItem('taswoq_favorites', JSON.stringify(state.favorites));
-
-  }
 
 
 
@@ -16457,8 +16431,7 @@ function toggleFavorite(event, productId) {
 
   }
 
-  localStorage.setItem('taswoq_favs_seeded', 'true');
-
+  localStorage.setItem('taswoq_user_favs_customized', 'true');
   localStorage.setItem('taswoq_favorites', JSON.stringify(state.favorites));
 
 

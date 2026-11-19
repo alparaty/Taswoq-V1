@@ -1510,14 +1510,6 @@ function renderFavoritesSection() {
   if (!listEl) return;
 
   state.favorites = state.favorites || {};
-  // Seed initial favorites if user has none stored
-  if (Object.keys(state.favorites).length === 0 && !localStorage.getItem('taswoq_favs_seeded')) {
-    state.favorites[1] = true; // طماطم بلدي
-    state.favorites[3] = true; // موز صومالي
-    state.favorites[7] = true; // تفاح أحمر
-    localStorage.setItem('taswoq_favs_seeded', 'true');
-    localStorage.setItem('taswoq_favorites', JSON.stringify(state.favorites));
-  }
 
   const favIds = Object.keys(state.favorites).filter(id => Boolean(state.favorites[id])).map(id => parseInt(id, 10));
   const favProducts = state.products.filter(p => favIds.includes(p.id));
@@ -1571,13 +1563,6 @@ function renderFavoritesScreen() {
   if (!grid) return;
 
   state.favorites = state.favorites || {};
-  // If no favorites stored yet, seed initial items [1, 3]
-  if (Object.keys(state.favorites).length === 0 && !localStorage.getItem('taswoq_favs_seeded')) {
-    state.favorites[1] = true;
-    state.favorites[3] = true;
-    localStorage.setItem('taswoq_favs_seeded', 'true');
-    localStorage.setItem('taswoq_favorites', JSON.stringify(state.favorites));
-  }
 
   const favIds = Object.keys(state.favorites).filter(id => Boolean(state.favorites[id])).map(id => parseInt(id, 10));
   const favProducts = state.products.filter(p => favIds.includes(p.id));
@@ -1649,6 +1634,7 @@ function toggleFavorite(event, productId) {
   sfx.playTap();
   state.favorites = state.favorites || {};
   state.favorites[productId] = !state.favorites[productId];
+  localStorage.setItem('taswoq_user_favs_customized', 'true');
   localStorage.setItem('taswoq_favorites', JSON.stringify(state.favorites));
   renderFavoritesScreen();
   renderProducts();
